@@ -1,22 +1,16 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    //moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
+    preset: 'jest-preset-angular',
     transform: {
         '^.+\\.(ts|js|mjs|html|svg)$': [
-            'ts-jest',
+            'jest-preset-angular',
             {
                 tsconfig: '<rootDir>/tsconfig.spec.json',
+                stringifyContentPathRegex: '\\.(html|svg)$',
             },
         ],
-        /*"^.+\\.(js|jsx|mjs)$": "babel-jest",*/
     },
-    "transformIgnorePatterns": [
-        "/node_modules/(?!@angular)|(?!@alkemist)",
-    ],
+    transformIgnorePatterns: ['node_modules/(?!.*.mjs$)'],
     setupFilesAfterEnv: ['<rootDir>/test/setup-jest.ts'],
-    //moduleDirectories: ["node_modules", "src"],
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
     },

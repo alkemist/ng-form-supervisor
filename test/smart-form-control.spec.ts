@@ -1,8 +1,8 @@
-import {describe, expect} from "@jest/globals";
+import {describe, expect, it} from "@jest/globals";
 import {SmartFormControl, SmartFormGroup} from "../src";
 
 describe("SmartFormGroup", () => {
-    describe("constructor", () => {
+    it("should create", () => {
         expect(new SmartFormControl<string>()).toBeTruthy();
     })
 });
