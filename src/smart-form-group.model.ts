@@ -1,7 +1,4 @@
-import {AbstractControlOptions, AsyncValidatorFn, FormGroup, ValidatorFn} from "@angular/forms";
-import {CompareEngine, ValueRecord} from "@alkemist/compare-engine";
-import {FormGroupInterface} from "./form.interface.js";
-
+/*
 export class SmartFormGroup<T extends ValueRecord> extends FormGroup<FormGroupInterface<T>> {
     compareEngine = new CompareEngine();
 
@@ -41,3 +38,4 @@ export class SmartFormGroup<T extends ValueRecord> extends FormGroup<FormGroupIn
         }
     }
 }
+*/
