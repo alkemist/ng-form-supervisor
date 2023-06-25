@@ -2,8 +2,8 @@
 
 ## Installation
 
-* From npm: `npm install @alkemist/ng-smart-form`
-* From yarn: `yarn add @alkemist/ng-smart-form`
+* From npm: `npm install @alkemist/ng-form-supervisor`
+* From yarn: `yarn add @alkemist/ng-form-supervisor`
 
 ## Test
 

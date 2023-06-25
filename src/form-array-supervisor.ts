@@ -45,6 +45,10 @@ export class FormArraySupervisor<
         return this.items.valid;
     }
 
+    get length(): number {
+        return this.items.length;
+    }
+
     get value(): ControlValueType<FormArray<FORM_TYPE>> | undefined {
         return this.items.value;
     }
@@ -80,35 +84,35 @@ export class FormArraySupervisor<
         return item;
     }
 
+    remove(index: number) {
+        this.items.removeAt(index);
+    }
+
+    splice(start: number, deleteCount?: number) {
+        // @TODO
+    }
+
     protected onChange(itemsValue: DATA_TYPE[] | undefined) {
         super.onChange(itemsValue);
-        //console.log("-- Array change", itemsValue);
-        //console.log("-- Is initialization ?", isInitialization)
 
         if (itemsValue) {
             if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
                 this.supervisors = [];
                 itemsValue.forEach((itemValue, index) => {
-                    // @TODO Si controls est vide ou si itemsValue.length > this.items.controls.length ???
                     const control = this.items.controls[index];
 
-                    if (control) {
-                        const supervisor =
-                            SupervisorHelper.factory<DATA_TYPE>(
-                                control as AbstractControl, this.determineArrayIndexFn
-                            )
+                    const supervisor =
+                        SupervisorHelper.factory<DATA_TYPE>(
+                            control as AbstractControl, this.determineArrayIndexFn
+                        )
 
-                        //console.log("-- item current itemValue", supervisor.itemValue);
-
-                        if (CompareHelper.isEvaluable(this.compareEngine.leftValue) && CompareHelper.isArray(this.compareEngine.leftValue)) {
-                            supervisor.updateInitialValue(this.compareEngine.leftValue.at(index) as DATA_TYPE[]);
-                            //console.log("-- item initial itemValue", this.compareEngine.leftValue.at(index));
-                        }
-                        //console.log("-- item has change ?", supervisor.hasChange());
-                        //console.log("-- item has change ?", supervisor.compareEngine);
-
-                        this.supervisors.push(supervisor);
+                    if (CompareHelper.isEvaluable(this.compareEngine.leftValue) && CompareHelper.isArray(this.compareEngine.leftValue)) {
+                        supervisor.updateInitialValue(
+                            this.compareEngine.leftValue.at(index) as DATA_TYPE[]
+                        );
                     }
+
+                    this.supervisors.push(supervisor);
                 })
             }
         }

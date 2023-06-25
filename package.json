@@ -1,5 +1,5 @@
 {
-  "name": "@alkemist/ng-smart-form",
+  "name": "@alkemist/ng-form-supervisor",
   "version": "0.0.1",
   "description": "Angular Smart Form",
   "main": "lib/index.min.mjs",
@@ -19,7 +19,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alkemist/ng-smart-form.git"
+    "url": "git+https://github.com/alkemist/ng-form-supervisor.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

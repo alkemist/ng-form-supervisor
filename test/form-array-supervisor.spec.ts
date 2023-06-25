@@ -40,16 +40,45 @@ describe("FormArraySupervisor", () => {
         expect(array.at(0).value).toEqual({id: 1, name: "user 1"});
         expect(array.at(0).valid).toBe(true);
 
-        supervisor.add({id: null, name: ""});
+        array.push(new FormGroup({
+            id: new FormControl<number | null>(null),
+            name: new FormControl<string>("", [Validators.required]),
+        }));
 
+        expect(supervisor.value).toEqual([
+            {id: 1, name: "user 1"},
+            {id: null, name: ""}
+        ]);
+        expect(supervisor.length).toBe(2);
         expect(supervisor.hasChange()).toBe(true);
         expect(supervisor.at(0).hasChange()).toBe(false);
         expect(supervisor.at(1).hasChange()).toBe(false);
-        expect(array.value).toEqual([{id: 1, name: "user 1"}, {id: null, name: ""}]);
-        expect(array.valid).toBe(false);
-        expect(array.at(1).value).toEqual({id: null, name: ""});
+        expect(supervisor.valid).toBe(false);
+
+        supervisor.add({id: null, name: ""});
+
+        expect(array.length).toBe(3);
+        expect(array.value).toEqual([
+            {id: 1, name: "user 1"},
+            {id: null, name: ""},
+            {id: null, name: ""}
+        ]);
         expect(array.at(0).valid).toBe(true);
         expect(array.at(1).valid).toBe(false);
+        expect(array.at(2).valid).toBe(false);
+        expect(array.valid).toBe(false);
+
+        array.removeAt(0);
+
+        expect(supervisor.value).toEqual([
+            {id: null, name: ""},
+            {id: null, name: ""}
+        ]);
+        expect(supervisor.length).toBe(2);
+        expect(supervisor.hasChange()).toBe(true);
+        /*expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(supervisor.valid).toBe(false);*/
     });
 
     it("Numbers array", () => {

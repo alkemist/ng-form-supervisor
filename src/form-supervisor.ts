@@ -30,6 +30,9 @@ export abstract class FormSupervisor<
 
     abstract setValue(value: DATA_TYPE | ControlRawValueType<FORM_TYPE> | undefined, options?: FormOptions): void;
 
+    // @TODO
+    //abstract patchValue(value: DATA_TYPE | ControlRawValueType<FORM_TYPE> | undefined, options?: FormOptions): void;
+
     abstract reset(options?: FormOptions): void;
 
     updateInitialValue(value?: DATA_TYPE | ControlRawValueType<FORM_TYPE>) {
