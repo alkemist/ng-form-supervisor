@@ -1,24 +1,42 @@
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {GenericValueRecord, ValueKey} from "@alkemist/compare-engine";
+import {ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
-import {ControlRawValueType, ControlValueType, FormGroupInterface, SupervisorRecord, ValueForm} from "./form.type.js";
+import {
+    ControlRawValueType,
+    ControlValueType,
+    FormArrayItemType,
+    FormGroupInterface,
+    ValueRecordForm
+} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
-export class FormGroupSupervisor<DATA_TYPE extends GenericValueRecord<ValueForm>>
+type SupervisorRecord<DATA_TYPE extends ValueRecordForm> = {
+    [K in keyof DATA_TYPE]: FormSupervisor<DATA_TYPE[K]>
+}
+
+export class FormGroupSupervisor<DATA_TYPE extends ValueRecordForm>
     extends FormSupervisor<DATA_TYPE, FormGroup<FormGroupInterface<DATA_TYPE>>> {
 
     supervisors: SupervisorRecord<DATA_TYPE>;
 
-    constructor(protected group: FormGroup<FormGroupInterface<DATA_TYPE>>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined) {
+    constructor(
+        protected group: FormGroup<FormGroupInterface<DATA_TYPE>>,
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
+        itemType?: FormArrayItemType<DATA_TYPE>
+    ) {
         super(determineArrayIndexFn);
 
         const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
 
         this.supervisors = properties
             .reduce((supervisors: SupervisorRecord<DATA_TYPE>, property) => {
-                supervisors[property] = SupervisorHelper.factory(this.controls[property] as AbstractControl);
+                supervisors[property] = SupervisorHelper.factory<DATA_TYPE>(
+                    this.controls[property] as AbstractControl,
+                    determineArrayIndexFn,
+                    itemType
+                );
                 return supervisors;
             }, {} as SupervisorRecord<DATA_TYPE>);
 

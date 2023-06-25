@@ -39,6 +39,17 @@ describe("FormArraySupervisor", () => {
         expect(array.valid).toBe(true);
         expect(array.at(0).value).toEqual({id: 1, name: "user 1"});
         expect(array.at(0).valid).toBe(true);
+
+        supervisor.add({id: null, name: ""});
+
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.value).toEqual([{id: 1, name: "user 1"}, {id: null, name: ""}]);
+        expect(array.valid).toBe(false);
+        expect(array.at(1).value).toEqual({id: null, name: ""});
+        expect(array.at(0).valid).toBe(true);
+        expect(array.at(1).valid).toBe(false);
     });
 
     it("Numbers array", () => {
@@ -55,5 +66,12 @@ describe("FormArraySupervisor", () => {
         expect(supervisor.at(0).value).toEqual(5);
         expect(supervisor.at(0).hasChange()).toBe(false);
         expect(supervisor.at(0).valid).toBe(true);
+
+        supervisor.add(9);
+
+        /*new FormArraySupervisor<User>(new FormArray<FormControl<User | null>>([
+            new FormControl<User>({id: null, name: ""} as User)
+        ]))
+            .add({id: null, name: ""} as User);*/
     });
 });

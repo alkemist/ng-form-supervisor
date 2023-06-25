@@ -1,6 +1,7 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormControl, Validators} from "@angular/forms";
 import {FormControlSupervisor} from "../src";
+import {User} from "./test-data";
 
 describe("FormControlSupervisor", () => {
     it("Basic", () => {
@@ -48,4 +49,16 @@ describe("FormControlSupervisor", () => {
         expect(control.value).toBe("new value");
         expect(control.valid).toBe(true);
     })
+
+    it("Object", () => {
+        const control =
+            new FormControl<User>({id: null, name: ""}, [Validators.required]);
+
+        const supervisor =
+            new FormControlSupervisor(control);
+
+        expect(supervisor.value).toEqual({id: null, name: ""});
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.valid).toBe(true);
+    });
 });

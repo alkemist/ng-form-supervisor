@@ -1,19 +1,20 @@
 import {AbstractControl} from "@angular/forms";
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {ControlRawValueType, ControlValueType, ValueForm} from "./form.type.js";
+import {ControlRawValueType, ControlValueType, ValueFormNullable} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
 export abstract class FormSupervisor<
-    DATA_TYPE extends ValueForm = ValueForm,
+    DATA_TYPE extends ValueFormNullable = ValueFormNullable,
     FORM_TYPE extends AbstractControl = AbstractControl
 > {
-    sub: Subscription = new Subscription();
+    protected sub: Subscription = new Subscription();
 
-    compareEngine: CompareEngine<DATA_TYPE | ControlValueType<FORM_TYPE>>;
-    destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
+    protected compareEngine: CompareEngine<DATA_TYPE | ControlValueType<FORM_TYPE>>;
 
-    protected constructor(determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined) {
+    private destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
+
+    protected constructor(protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey)) {
         this.compareEngine = new CompareEngine<DATA_TYPE | ControlValueType<FORM_TYPE>>(determineArrayIndexFn)
 
         this.destructor = new FinalizationRegistry(() => {
@@ -23,7 +24,7 @@ export abstract class FormSupervisor<
 
     abstract get valid(): boolean;
 
-    abstract get value(): DATA_TYPE | ControlValueType<FORM_TYPE>;
+    abstract get value(): DATA_TYPE | ControlValueType<FORM_TYPE> | undefined;
 
     abstract get valueChanges(): Observable<DATA_TYPE | ControlValueType<FORM_TYPE>>;
 
@@ -52,7 +53,7 @@ export abstract class FormSupervisor<
         this.compareEngine.updateCompareIndex();
     }
 
-    protected onChange(value: DATA_TYPE | ControlValueType<FORM_TYPE>) {
+    protected onChange(value: DATA_TYPE | ControlValueType<FORM_TYPE> | undefined) {
         this.compareEngine.updateRight(value);
         this.compareEngine.updateCompareIndex();
     }

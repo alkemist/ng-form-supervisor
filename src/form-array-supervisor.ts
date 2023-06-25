@@ -6,26 +6,31 @@ import {SupervisorHelper} from "./supervisor.helper.js";
 import {
     ControlRawValueType,
     ControlValueType,
-    FormArrayType,
-    FormGroupInterface,
-    ValueForm,
-    ValueRecordForm
+    FormArrayItemType,
+    FormItemInterface,
+    ValueFormNullable
 } from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
 export class FormArraySupervisor<
-    DATA_TYPE extends ValueForm,
-    FORM_TYPE extends FormArray<FormControl> = DATA_TYPE extends ValueRecordForm
-        ? FormArray<FormGroup<FormGroupInterface<DATA_TYPE>>>
-        : FormArray<FormControl<DATA_TYPE | null>>
-> extends FormSupervisor<(DATA_TYPE | null)[], FORM_TYPE> {
+    DATA_TYPE extends ValueFormNullable,
+    FORM_TYPE extends FormItemInterface<DATA_TYPE> = FormItemInterface<DATA_TYPE>,
+> extends FormSupervisor<DATA_TYPE[], FormArray<FORM_TYPE>> {
     supervisors: FormSupervisor<DATA_TYPE>[] = [];
-    items: FORM_TYPE;
+    items: FormArray<FORM_TYPE>;
 
-    constructor(items: FormArrayType<DATA_TYPE>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined);
-    constructor(items: FORM_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined) {
+    itemType: FormArrayItemType<DATA_TYPE>;
+
+    constructor(items?: FormArray<FormGroup>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey), itemType?: FormArrayItemType<DATA_TYPE>);
+    constructor(items?: FormArray<FormControl>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey), itemType?: FormArrayItemType<DATA_TYPE>);
+    constructor(
+        items: FormArray<FORM_TYPE> = new FormArray<FORM_TYPE>([]),
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
+        itemType?: FormArrayItemType<DATA_TYPE>
+    ) {
         super(determineArrayIndexFn);
         this.items = items;
+        this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, FORM_TYPE>(items);
 
         this.onChange(this.value);
 
@@ -40,15 +45,15 @@ export class FormArraySupervisor<
         return this.items.valid;
     }
 
-    get value(): ControlValueType<FORM_TYPE> | DATA_TYPE[] {
+    get value(): ControlValueType<FormArray<FORM_TYPE>> | undefined {
         return this.items.value;
     }
 
-    get valueChanges(): Observable<ControlValueType<FORM_TYPE> | DATA_TYPE[]> {
+    get valueChanges(): Observable<ControlValueType<FormArray<FORM_TYPE>>> {
         return this.items.valueChanges;
     }
 
-    setValue(itemsValue: ControlRawValueType<FORM_TYPE> | DATA_TYPE[], options?: FormOptions) {
+    setValue(itemsValue: ControlRawValueType<FormArray<FORM_TYPE>>, options?: FormOptions) {
         this.items.setValue(itemsValue);
     }
 
@@ -67,28 +72,47 @@ export class FormArraySupervisor<
     }
 
     add(itemValue: DATA_TYPE, options?: FormOptions) {
-        this.items.push(new FormControl<DATA_TYPE>(itemValue))
+        const item = SupervisorHelper.factoryItem<DATA_TYPE, FORM_TYPE>(
+            this.itemType as FormArrayItemType<DATA_TYPE>,
+            itemValue
+        );
+        this.items.push(item, options);
+        return item;
     }
 
-    protected onChange(itemsValue: ControlValueType<FORM_TYPE> | DATA_TYPE[]) {
+    protected onChange(itemsValue: DATA_TYPE[] | undefined) {
         super.onChange(itemsValue);
-        //console.log("- array change", itemsValue);
+        //console.log("-- Array change", itemsValue);
+        //console.log("-- Is initialization ?", isInitialization)
 
-        if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
-            this.supervisors = itemsValue.map((itemValue, index) => {
-                const supervisor = SupervisorHelper.factory(this.items.controls[index] as AbstractControl)
+        if (itemsValue) {
+            if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
+                this.supervisors = [];
+                itemsValue.forEach((itemValue, index) => {
+                    // @TODO Si controls est vide ou si itemsValue.length > this.items.controls.length ???
+                    const control = this.items.controls[index];
 
-                //console.log("-- item current itemValue", supervisor.itemValue);
+                    if (control) {
+                        const supervisor =
+                            SupervisorHelper.factory<DATA_TYPE>(
+                                control as AbstractControl, this.determineArrayIndexFn
+                            )
 
-                if (this.compareEngine.leftValue) {
-                    supervisor.updateInitialValue(this.compareEngine.leftValue.at(index));
-                    //console.log("-- item initial itemValue", this.compareEngine.leftValue.at(index));
-                }
-                //console.log("-- item has change ?", supervisor.hasChange());
-                //console.log("-- item has change ?", supervisor.compareEngine);
+                        //console.log("-- item current itemValue", supervisor.itemValue);
 
-                return supervisor;
-            })
+                        if (CompareHelper.isEvaluable(this.compareEngine.leftValue) && CompareHelper.isArray(this.compareEngine.leftValue)) {
+                            supervisor.updateInitialValue(this.compareEngine.leftValue.at(index) as DATA_TYPE[]);
+                            //console.log("-- item initial itemValue", this.compareEngine.leftValue.at(index));
+                        }
+                        //console.log("-- item has change ?", supervisor.hasChange());
+                        //console.log("-- item has change ?", supervisor.compareEngine);
+
+                        this.supervisors.push(supervisor);
+                    }
+                })
+            }
         }
+
+        //console.log('-- Supervisors :', this.supervisors.map(supervisor => supervisor.constructor.name))
     }
 }

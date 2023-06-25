@@ -2,11 +2,11 @@ import {FormControl} from "@angular/forms";
 import {Observable} from "rxjs";
 import {ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
-import {ValueForm} from "./form.type.js";
+import {ValueFormNullable} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
-export class FormControlSupervisor<DATA_TYPE extends ValueForm> extends FormSupervisor<DATA_TYPE, FormControl<DATA_TYPE>> {
-    constructor(protected control: FormControl<DATA_TYPE>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined) {
+export class FormControlSupervisor<DATA_TYPE extends ValueFormNullable> extends FormSupervisor<DATA_TYPE, FormControl<DATA_TYPE>> {
+    constructor(protected control: FormControl<DATA_TYPE>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey)) {
         super(determineArrayIndexFn);
 
         this.updateInitialValue();
