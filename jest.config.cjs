@@ -1,3 +1,6 @@
+//const {pathsToModuleNameMapper} = require('ts-jest');
+//const {compilerOptions} = require('./tsconfig');
+
 module.exports = {
     preset: 'jest-preset-angular',
     transform: {
@@ -14,4 +17,6 @@ module.exports = {
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
     },
+    //moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
+
 };
