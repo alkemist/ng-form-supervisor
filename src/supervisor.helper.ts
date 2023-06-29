@@ -1,34 +1,25 @@
 import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
-import {FormArraySupervisor} from "./form-array-supervisor.js";
+import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "./form-array-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {
     ControlValueType,
-    FormArrayControlItemInterfaceType,
     FormArrayGroupInterfaceType,
     FormArrayItemInterfaceType,
     FormArrayItemType,
     FormGroupInterface,
     isValueRecordForm,
+    SupervisorType,
     ValueFormNullable,
     ValueRecordForm
 } from "./form.type.js";
 import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
-import {FormArrayControlSupervisor} from "./form-array-control-supervisor.js";
-import {FormArrayGroupSupervisor} from "./form-array-group-supervisor.js";
 
 export abstract class SupervisorHelper {
     static factory<
         DATA_TYPE,
         FORM_TYPE extends FormControl | FormArray | FormGroup,
-        SUPERVISOR_TYPE =
-            FORM_TYPE extends FormArray
-                ? FormArraySupervisor<DATA_TYPE>
-                : FORM_TYPE extends FormGroup
-                    ? DATA_TYPE extends ValueRecordForm
-                        ? FormGroupSupervisor<DATA_TYPE>
-                        : FormControlSupervisor<DATA_TYPE>
-                    : FormControlSupervisor<DATA_TYPE>,
+        SUPERVISOR_TYPE = SupervisorType<DATA_TYPE, FORM_TYPE>
     >(
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
@@ -94,13 +85,6 @@ export abstract class SupervisorHelper {
         } as FormArrayItemInterfaceType<DATA_TYPE>
     }
 
-    static isFormGroupInterface<
-        DATA_TYPE extends ValueRecordForm,
-    >(itemInterface: FormArrayGroupInterfaceType<DATA_TYPE> | FormArrayControlItemInterfaceType)
-        : itemInterface is FormArrayGroupInterfaceType<DATA_TYPE> {
-        return itemInterface !== 'control';
-    }
-
     static factoryItem<
         DATA_TYPE,
         FORM_TYPE extends FormGroup | FormControl
@@ -110,14 +94,6 @@ export abstract class SupervisorHelper {
     ): FORM_TYPE {
         if (CompareHelper.isRecord<ValueFormNullable>(itemValue)
             && CompareHelper.isRecord<isValueRecordForm<DATA_TYPE>>(itemInterface.interface)) {
-            // && SupervisorHelper.isFormGroupInterface<isValueRecordForm<DATA_TYPE>>(itemInterface.interface)) {// && SupervisorHelper.isFormGroupInterface(itemInterface.interface)) {
-
-            //const itemValue2: isValueRecordForm<DATA_TYPE> = itemValue;
-            /*if (!itemValue || !CompareHelper.isRecord(itemValue)) {
-                throw new Error("Impossible to build group form")
-            }*/
-
-            //type DataType = GetMyClassT<typeof itemInterface.interface>;
             return SupervisorHelper.factoryGroupItem<isValueRecordForm<DATA_TYPE>>(
                 itemInterface.interface as FormArrayGroupInterfaceType<isValueRecordForm<DATA_TYPE>>,
                 itemInterface.validator,

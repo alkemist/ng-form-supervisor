@@ -121,7 +121,9 @@ export class FormArraySupervisor<
                             control, this.determineArrayIndexFn
                         )
 
-                    if (CompareHelper.isEvaluable(this.compareEngine.leftValue) && CompareHelper.isArray(this.compareEngine.leftValue)) {
+                    if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
+                        && CompareHelper.isArray(this.compareEngine.leftValue)) {
+                        
                         supervisor.updateInitialValue(
                             this.compareEngine.leftValue.at(index) as DATA_TYPE
                         );
@@ -131,5 +133,37 @@ export class FormArraySupervisor<
                 })
             }
         }
+    }
+}
+
+export class FormArrayControlSupervisor<
+    DATA_TYPE
+> extends FormArraySupervisor<
+    DATA_TYPE,
+    FormControl<DATA_TYPE | null>,
+    FormControlSupervisor<DATA_TYPE>
+> {
+    constructor(
+        items: FormArray<FormControl<DATA_TYPE | null>>,
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+    ) {
+        super(items, determineArrayIndexFn, itemType);
+    }
+}
+
+export class FormArrayGroupSupervisor<
+    DATA_TYPE
+> extends FormArraySupervisor<
+    DATA_TYPE,
+    FormGroup<FormGroupInterface<DATA_TYPE>>,
+    FormGroupSupervisor<DATA_TYPE>
+> {
+    constructor(
+        items: FormArray<FormGroup<FormGroupInterface<DATA_TYPE>>>,
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+    ) {
+        super(items, determineArrayIndexFn, itemType);
     }
 }

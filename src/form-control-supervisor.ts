@@ -14,7 +14,7 @@ export class FormControlSupervisor<DATA_TYPE>
 
         this.updateInitialValue();
         this.sub.add(this.control.valueChanges.subscribe((value) => {
-            this.onChange(value)
+            super.onChange(value)
         }));
     }
 

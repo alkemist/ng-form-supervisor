@@ -18,7 +18,7 @@ export interface UserRights extends GenericValueRecord<boolean> {
 }
 
 export interface ComplexeUser extends BasicUser {
-    groups: string[],
+    groups: USER_GROUP[],
     profiles: UserProfile[]
     rights: UserRights
 }

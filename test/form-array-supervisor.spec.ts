@@ -1,11 +1,10 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {BasicUser} from "./test-data";
-import {FormGroupInterface} from "../src";
-import {FormArrayGroupSupervisor} from "../src/form-array-group-supervisor";
 import {FormGroupSupervisor} from "../src/form-group-supervisor";
 import {FormControlSupervisor} from "../src/form-control-supervisor";
-import {FormArrayControlSupervisor} from "../src/form-array-control-supervisor";
+import {FormGroupInterface} from "../src/form.type";
+import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
 
 describe("FormArraySupervisor", () => {
     it("Users group array", () => {
@@ -27,7 +26,7 @@ describe("FormArraySupervisor", () => {
             }),
             newValidItem: {id: 2, name: "user 2"},
             invalidFirstItem: {id: 1, name: ""}
-        });
+        }, true);
 
         expect(supervisor.at(0)).toBeInstanceOf(FormGroupSupervisor);
         expect(supervisor.at(0).get('id')).toBeInstanceOf(FormControlSupervisor);
@@ -86,7 +85,8 @@ interface FormArrayTestData<
 function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
     array: FormArray<FORM_TYPE>,
     supervisor: FormArrayGroupSupervisor<DATA_TYPE> | FormArrayControlSupervisor<DATA_TYPE>,
-    testData: FormArrayTestData<DATA_TYPE, FORM_TYPE>
+    testData: FormArrayTestData<DATA_TYPE, FORM_TYPE>,
+    showLog = false
 ) {
     expect(supervisor.value).toEqual([testData.initialValidItem]);
     expect(supervisor.hasChange()).toBe(false);
@@ -202,6 +202,7 @@ function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
     expect(supervisor.hasChange()).toBe(false);
 
     supervisor.at(0).setValue(testData.invalidFirstItem as never);
+    supervisor.add(testData.invalidItem);
 
     expect(supervisor.hasChange()).toBe(true);
     expect(supervisor.at(0).hasChange()).toBe(true);
@@ -209,6 +210,7 @@ function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
     expect(array.valid).toBe(false);
     expect(array.at(0).valid).toBe(false);
     expect(array.at(0).value).toEqual(testData.invalidFirstItem);
+    expect(array.length).toBe(3);
 
     supervisor.restore();
 

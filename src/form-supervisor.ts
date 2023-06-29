@@ -50,8 +50,6 @@ export abstract class FormSupervisor<
 
     restore(options?: FormOptions) {
         this.setValue(this.compareEngine.leftValue, options);
-        this.compareEngine.leftToRight();
-        this.compareEngine.updateCompareIndex();
     }
 
     protected onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | undefined) {

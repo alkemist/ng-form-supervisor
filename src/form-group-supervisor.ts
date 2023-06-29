@@ -7,8 +7,7 @@ import {ControlRawValueType, ControlValueType, FormGroupInterface, SupervisorTyp
 import {FormOptions} from "./form.interface.js";
 
 type SupervisorRecord<DATA_TYPE> = {
-    [K in keyof DATA_TYPE]: SupervisorType<DATA_TYPE[K],
-        FormGroupInterface<DATA_TYPE>[K]>
+    [K in keyof DATA_TYPE]: SupervisorType<DATA_TYPE[K], FormGroupInterface<DATA_TYPE>[K]>
 }
 
 export class FormGroupSupervisor<DATA_TYPE>
@@ -28,7 +27,7 @@ export class FormGroupSupervisor<DATA_TYPE>
         const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
 
         this.supervisors = properties
-            .reduce((supervisors: SupervisorRecord<DATA_TYPE>, property, index) => {
+            .reduce((supervisors: SupervisorRecord<DATA_TYPE>, property: keyof DATA_TYPE) => {
                 const control = this.controls[property] as FormGroup | FormArray | FormControl;
                 type DataType = ControlValueType<typeof control>;
 
@@ -40,20 +39,18 @@ export class FormGroupSupervisor<DATA_TYPE>
                     determineArrayIndexFn,
                 );
 
-                console.log(
-                    properties[index],
-                    control?.constructor.name,
-                    (supervisor as FormSupervisor).constructor.name
-                )
+                supervisors[property] = supervisor as SupervisorType<
+                    DataType,
+                    FormGroupInterface<DATA_TYPE>[keyof DATA_TYPE]
+                >
 
-                supervisors[property] = supervisor as SupervisorType<DATA_TYPE[keyof DATA_TYPE], FormGroupInterface<DATA_TYPE>[keyof DATA_TYPE]>;
                 return supervisors;
             }, {} as SupervisorRecord<DATA_TYPE>);
 
         this.updateInitialValue();
 
         this.sub.add(this.group.valueChanges.subscribe((value) => {
-            this.onChange(value)
+            super.onChange(value)
         }));
     }
 
@@ -81,13 +78,32 @@ export class FormGroupSupervisor<DATA_TYPE>
         this.group.reset();
     }
 
-    get(property: keyof DATA_TYPE)
-    /*DATA_TYPE[keyof DATA_TYPE] extends ValueRecordForm
-        ? FormGroupSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormControlSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormArraySupervisor<DATA_TYPE[keyof DATA_TYPE]>
-        : FormControlSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormArraySupervisor<DATA_TYPE[keyof DATA_TYPE]>*/
-    /*SupervisorType<DATA_TYPE[keyof DATA_TYPE],
-        FormGroupInterface<DATA_TYPE>[keyof DATA_TYPE]>*/ {
+    restore(options?: FormOptions) {
+        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        properties.forEach((property) => this.get(property).restore())
 
+        super.restore();
+    }
+
+    /*get(property: keyof DATA_TYPE):
+        /*DATA_TYPE[keyof DATA_TYPE] extends ValueRecordForm
+            ? FormGroupSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormControlSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormArraySupervisor<DATA_TYPE[keyof DATA_TYPE]>
+            : FormControlSupervisor<DATA_TYPE[keyof DATA_TYPE]> | FormArraySupervisor<DATA_TYPE[keyof DATA_TYPE]>
+    /*SupervisorType<DATA_TYPE[keyof DATA_TYPE],
+        FormGroupInterface<DATA_TYPE>[keyof DATA_TYPE]> {
+
+        return this.supervisors[property];
+    }*/
+
+    //get<T extends keyof DATA_TYPE>(property: T): typeof this.supervisors[T] {
+    //get<K extends keyof DATA_TYPE = keyof DATA_TYPE>(property: K): SupervisorType<DATA_TYPE[K], FormGroupInterface<DATA_TYPE>[K]> {
+    get<K extends keyof DATA_TYPE>(property: K): FormGroupInterface<DATA_TYPE>[K] /*extends FormArray
+        ? FormArraySupervisor<DATA_TYPE[K]>
+        : FormGroupInterface<DATA_TYPE>[K] extends FormGroup
+            ? DATA_TYPE[K] extends ValueRecordForm
+                ? FormGroupSupervisor<DATA_TYPE[K]>
+                : FormControlSupervisor<DATA_TYPE[K]>
+            : FormControlSupervisor<DATA_TYPE[K]>*/ {
         return this.supervisors[property];
     }
 }
