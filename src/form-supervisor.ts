@@ -1,12 +1,11 @@
-import {AbstractControl} from "@angular/forms";
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {ControlValueType, FormDataType, FormRowDataType, ValueFormNullable} from "./form.type.js";
+import {AbstractForm, ControlValueType, FormDataType, FormRowDataType, ValueFormNullable} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
 export abstract class FormSupervisor<
     DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractControl = AbstractControl
+    FORM_TYPE extends AbstractForm = AbstractForm
 > {
     public compareEngine: CompareEngine<FormDataType<DATA_TYPE, FORM_TYPE>>;
     protected sub: Subscription = new Subscription();
@@ -19,6 +18,8 @@ export abstract class FormSupervisor<
             this.sub.unsubscribe();
         });
     }
+
+    abstract get form(): FORM_TYPE;
 
     abstract get valid(): boolean;
 

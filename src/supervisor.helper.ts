@@ -1,8 +1,9 @@
-import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
+import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "./form-array-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {
+    AbstractForm,
     ControlValueType,
     FormArrayGroupInterfaceType,
     FormArrayItemInterfaceType,
@@ -18,7 +19,7 @@ import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
 export abstract class SupervisorHelper {
     static factory<
         DATA_TYPE,
-        FORM_TYPE extends FormControl | FormArray | FormGroup,
+        FORM_TYPE extends AbstractForm,
         SUPERVISOR_TYPE = SupervisorType<DATA_TYPE, FORM_TYPE>
     >(
         control: FORM_TYPE,
@@ -35,7 +36,7 @@ export abstract class SupervisorHelper {
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(control as FormArray, determineArrayIndexFn, itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>>);
             }
         } else if (control instanceof FormGroup) {
-            supervisor = new FormGroupSupervisor<DataType>(control as FormGroup, determineArrayIndexFn);
+            supervisor = new FormGroupSupervisor<DataType>(control as FormGroup<FormGroupInterface<DataType>>, determineArrayIndexFn);
         } else {
             supervisor = new FormControlSupervisor<DataType>(control as FormControl<DataType>, determineArrayIndexFn);
         }
@@ -58,14 +59,14 @@ export abstract class SupervisorHelper {
     static extractFormGroupItemsInterface<DATA_TYPE extends ValueRecordForm>(
         group: FormGroup
     ): FormArrayGroupInterfaceType<DATA_TYPE> {
-        const controls = group.controls as Record<keyof DATA_TYPE, AbstractControl>;
+        const controls = group.controls as Record<keyof DATA_TYPE, AbstractForm>;
         const properties = Object.keys(controls) as (keyof DATA_TYPE)[];
 
         return properties.reduce((formGroupInterface: FormArrayGroupInterfaceType<DATA_TYPE>, property: keyof DATA_TYPE) => {
-            const control = controls[property] as AbstractControl;
+            const control = controls[property] as AbstractForm;
             type DataType = ControlValueType<typeof control>;
 
-            formGroupInterface[property] = SupervisorHelper.extractFormGroupItemInterface<DataType, AbstractControl>(control) as
+            formGroupInterface[property] = SupervisorHelper.extractFormGroupItemInterface<DataType, typeof control>(control) as
                 FormArrayGroupInterfaceType<DATA_TYPE>[keyof DATA_TYPE];
             return formGroupInterface;
         }, {} as FormArrayGroupInterfaceType<DATA_TYPE>);
@@ -73,7 +74,7 @@ export abstract class SupervisorHelper {
 
     static extractFormGroupItemInterface<
         DATA_TYPE,
-        FORM_TYPE extends AbstractControl
+        FORM_TYPE extends AbstractForm
     >(control: FORM_TYPE): FormArrayItemInterfaceType<DATA_TYPE> {
         type DataType = ControlValueType<typeof control>;
         const itemInterface = control instanceof FormGroup

@@ -18,6 +18,10 @@ export class FormControlSupervisor<DATA_TYPE>
         }));
     }
 
+    get form(): FormControl<DATA_TYPE> {
+        return this.control;
+    }
+
     get valid(): boolean {
         return this.control.valid;
     }

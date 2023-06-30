@@ -29,7 +29,7 @@ describe("FormArraySupervisor", () => {
         }, true);
 
         expect(supervisor.at(0)).toBeInstanceOf(FormGroupSupervisor);
-        expect(supervisor.at(0).get('id')).toBeInstanceOf(FormControlSupervisor);
+        expect(supervisor.at(0).getWithTypes('id')).toBeInstanceOf(FormControlSupervisor);
     });
 
     it("Numbers control array", () => {

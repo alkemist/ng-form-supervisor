@@ -3,17 +3,23 @@ import {Observable} from "rxjs";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
-import {ControlValueType, FormArrayItemInterfaceType, FormGroupInterface, ValueRecordForm} from "./form.type.js";
+import {
+    AbstractArrayItemForm,
+    ControlValueType,
+    FormArrayItemInterfaceType,
+    FormGroupInterface,
+    ValueRecordForm
+} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 
 export class FormArraySupervisor<
     DATA_TYPE,
-    FORM_TYPE extends FormControl | FormGroup = DATA_TYPE extends ValueRecordForm
+    FORM_TYPE extends AbstractArrayItemForm = DATA_TYPE extends ValueRecordForm
         ? FormControl<DATA_TYPE | null> | FormGroup<FormGroupInterface<DATA_TYPE>>
         : FormControl<DATA_TYPE | null>,
-    SUPERVISOR_TYPE extends FormSupervisor =
+    SUPERVISOR_TYPE extends FormSupervisor<DATA_TYPE> =
         DATA_TYPE extends ValueRecordForm
             ? FORM_TYPE extends FormGroup
                 ? FormGroupSupervisor<DATA_TYPE>
@@ -43,6 +49,10 @@ export class FormArraySupervisor<
         this.sub.add(this.valueChanges.subscribe((itemsValue) => {
             this.onChange(itemsValue)
         }));
+    }
+
+    get form(): FormArray<FORM_TYPE> {
+        return this._items;
     }
 
     get valid(): boolean {
@@ -123,7 +133,7 @@ export class FormArraySupervisor<
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
                         && CompareHelper.isArray(this.compareEngine.leftValue)) {
-                        
+
                         supervisor.updateInitialValue(
                             this.compareEngine.leftValue.at(index) as DATA_TYPE
                         );
