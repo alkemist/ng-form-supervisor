@@ -9,13 +9,13 @@ import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-
 describe("FormGroupSupervisor", () => {
     it("Basic", () => {
         const group =
-            new FormGroup/*<{
+            new FormGroup<{
                 id: FormControl<number | null>,
                 name: FormControl<string | null>,
                 groups: FormArray<FormControl<USER_GROUP | null>>,
                 profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
                 rights: FormGroup<FormGroupInterface<UserRights>>
-            }>*/({
+            }>({
                 id: new FormControl<number | null>(1),
                 name: new FormControl<string | null>("user 1", [
                     Validators.required,
@@ -68,14 +68,27 @@ describe("FormGroupSupervisor", () => {
                 profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
                 rights: FormGroup<FormGroupInterface<UserRights>>
             }>(group);*/
-        const supervisor = FormGroupSupervisor.create({
+
+        const supervisor = FormGroupSupervisor.create<{
+            id: number | null,
+            name: string
+            groups: USER_GROUP[],
+            profiles: UserProfile[]
+            rights: UserRights
+        }, FormGroup<{
+            id: FormControl<number | null>,
+            name: FormControl<string | null>,
+            groups: FormArray<FormControl<USER_GROUP | null>>,
+            profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
+            rights: FormGroup<FormGroupInterface<UserRights>>
+        }>>({
             id: 1,
             name: "user 1",
             groups: ["USER"],
             profiles: [
                 {
                     username: "username1",
-                    avatar: null
+                    avatar: ""
                 }
             ],
             rights: {
@@ -86,40 +99,32 @@ describe("FormGroupSupervisor", () => {
 
         expect(supervisor.value).toEqual(initialValue);
 
-        const arrayControlSupervisor = supervisor.getWithTypes("groups");
-        const arrayGroupSupervisor = supervisor.getWithTypes("profiles");
-        const groupSupervisor = supervisor.getWithTypes("rights");
+        expect(supervisor.get("name")).toBeInstanceOf(FormControlSupervisor);
+        expect(supervisor.get("groups")).toBeInstanceOf(FormArrayControlSupervisor);
+        expect(supervisor.get("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
+        expect(supervisor.get("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
+        expect(supervisor.get("profiles")).toBeInstanceOf(FormArrayGroupSupervisor);
+        expect(supervisor.get("profiles").at(0)).toBeInstanceOf(FormGroupSupervisor);
+        expect(supervisor.get("rights")).toBeInstanceOf(FormGroupSupervisor);
 
-        expect(supervisor.getByProperty("id")).toBeInstanceOf(FormControlSupervisor);
-        expect(supervisor.getByProperty("groups")).toBeInstanceOf(FormArrayControlSupervisor);
-        expect(supervisor.getByProperty("profiles")).toBeInstanceOf(FormArrayGroupSupervisor);
-        expect(supervisor.getByProperty("rights")).toBeInstanceOf(FormGroupSupervisor);
-
-        //expect(supervisor.getByProperty("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
-        //expect(supervisor.get("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
-        //expect(supervisor.getByProperty("groups", supervisor.getByControlType("groups")).at(0)).toBeInstanceOf(FormControlSupervisor);
         expect(supervisor.getFormProperty("name")).toBeInstanceOf(FormControl);
+        expect(supervisor.getFormProperty("groups")).toBeInstanceOf(FormArray);
+        expect(supervisor.getFormProperty("groups").at(0)).toBeInstanceOf(FormControl);
         expect(supervisor.getFormProperty("profiles")).toBeInstanceOf(FormArray);
+        expect(supervisor.getFormProperty("profiles").at(0)).toBeInstanceOf(FormGroup);
         expect(supervisor.getFormProperty("rights")).toBeInstanceOf(FormGroup);
-        //expect(supervisor.getFormProperty("profiles").push).toBeTruthy();
+        expect(supervisor.getFormProperty("rights")).toBeInstanceOf(FormGroup);
 
         expect(supervisor.hasChange()).toBe(false);
         expect(supervisor.valid).toBe(true);
 
         group.get("name")?.setValue("us");
         (group.get("groups") as FormArray)?.removeAt(0);
-        /*(group.get("profiles") as FormArray)?.push(new FormGroup<FormGroupInterface<UserProfile>>({
+        (group.get("profiles") as FormArray)?.push(new FormGroup<FormGroupInterface<UserProfile>>({
             username: new FormControl<string>("", [Validators.required]),
             avatar: new FormControl<string | null>(null),
-        }));*/
-        const arrayControl = supervisor.getFormProperty("profiles");
-        arrayControl//(arrayControl as FormArray<FormGroup<FormGroupInterface<UserProfile>>>)
-            .push(new FormGroup<FormGroupInterface<UserProfile>>({
-                username: new FormControl<string>("", [Validators.required]),
-                avatar: new FormControl<string | null>(null),
-            }));
-        const groupControl = supervisor.getFormProperty("rights")
-        groupControl.get("viewUsers")?.setValue(true)
+        }));
+        group.get("rights")?.get("viewUsers")?.setValue(true)
 
         expect(supervisor.value).toEqual({
             ...initialValue,
@@ -142,16 +147,16 @@ describe("FormGroupSupervisor", () => {
         });
         expect(supervisor.hasChange()).toBe(true);
         expect(supervisor.valid).toBe(false);
-        expect(supervisor.getWithTypes("id").value).toBe(1);
-        expect(supervisor.getWithTypes("id").hasChange()).toBe(false);
-        expect(supervisor.getWithTypes("id").valid).toBe(true);
-        expect(supervisor.getWithTypes("name").value).toBe("us");
-        expect(supervisor.getWithTypes("name").hasChange()).toBe(true);
-        expect(supervisor.getWithTypes("name").valid).toBe(false);
-        expect(supervisor.getWithTypes("groups").value).toEqual([]);
-        expect(supervisor.getWithTypes("groups").hasChange()).toEqual(true);
-        expect(supervisor.getWithTypes("groups").valid).toBe(false);
-        expect(supervisor.getWithTypes("profiles").value).toEqual([
+        expect(supervisor.get("id").value).toBe(1);
+        expect(supervisor.get("id").hasChange()).toBe(false);
+        expect(supervisor.get("id").valid).toBe(true);
+        expect(supervisor.get("name").value).toBe("us");
+        expect(supervisor.get("name").hasChange()).toBe(true);
+        expect(supervisor.get("name").valid).toBe(false);
+        expect(supervisor.get("groups").value).toEqual([]);
+        expect(supervisor.get("groups").hasChange()).toEqual(true);
+        expect(supervisor.get("groups").valid).toBe(false);
+        expect(supervisor.get("profiles").value).toEqual([
             {
                 username: "username1",
                 avatar: null,
@@ -161,14 +166,14 @@ describe("FormGroupSupervisor", () => {
                 avatar: null
             }
         ]);
-        expect(supervisor.getWithTypes("profiles").hasChange()).toEqual(true);
-        expect(supervisor.getWithTypes("profiles").valid).toBe(false);
-        expect(supervisor.getWithTypes("rights").value).toEqual({
+        expect(supervisor.get("profiles").hasChange()).toEqual(true);
+        expect(supervisor.get("profiles").valid).toBe(false);
+        expect(supervisor.get("rights").value).toEqual({
             viewProfile: true,
             viewUsers: true
         });
-        expect(supervisor.getWithTypes("rights").hasChange()).toEqual(true);
-        expect(supervisor.getWithTypes("rights").valid).toBe(true);
+        expect(supervisor.get("rights").hasChange()).toEqual(true);
+        expect(supervisor.get("rights").valid).toBe(true);
 
         supervisor.restore();
 

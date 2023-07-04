@@ -1,6 +1,6 @@
-import {GenericValueRecord, ValueKey, ValuePrimitive} from "@alkemist/compare-engine";
-import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {FormArraySupervisor} from "./form-array-supervisor.js";
+import {ValueKey, ValuePrimitive} from "@alkemist/compare-engine";
+import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
+import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "./form-array-supervisor.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 
@@ -15,27 +15,33 @@ export interface ValueRecordForm {
 export interface ValueArrayForm extends Array<ValueFormNullable> {
 }
 
-export declare type ControlValueType<T extends AbstractForm> = T extends AbstractForm ? T['value'] : never;
+export declare type ControlValueType<T extends AbstractControl> = T extends AbstractForm ? T['value'] : never;
 
-/*export declare type ControlRawValueType<T extends AbstractForm>
-    = T extends AbstractForm ? (T['setValue'] extends ((v: infer R) => void) ? R : never) : never;*/
-export declare type ControlRawValueType<T extends AbstractForm, DATA_TYPE>
-    = T extends AbstractForm ? (T['setValue'] extends ((v: infer R extends DATA_TYPE) => void) ? R : never) : never;
+export type GroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<DATA_TYPE>, DATA_TYPE>
+    = { [K in keyof FORM_GROUP_INTERFACE]: ControlValueType<FORM_GROUP_INTERFACE[K]>; }
 
-export type GetMyClassT<C> = C extends GenericValueRecord<infer T extends ValueFormNullable> ? T : never;
+export declare type ControlRawValueType<T extends AbstractControl>
+    = T extends AbstractControl ? (T['setValue'] extends ((v: infer R) => void) ? R : never) : never;
 
-//export type GetMyClassT2<C, D> = C extends GenericValueRecord<infer T extends { [K in keyof D]: D[K] }> ? T : never;
-export type GetMyClassT2<C, D> = C extends GenericValueRecord<infer T extends FormGroupInterface<D>> ? T : never;
+export type GroupRawValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<DATA_TYPE>, DATA_TYPE>
+    = { [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>; }
+
+export type GroupRawValueType2<FORM_GROUP extends FormGroup<FormGroupGeneric<DATA_TYPE>>, DATA_TYPE>
+    = { [K in keyof DATA_TYPE]: ControlRawValueType<GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE>[K]>; }
 
 export type FormDataType<
     DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractForm = AbstractForm
-> = DATA_TYPE | ControlValueType<FORM_TYPE>;
+    FORM_TYPE extends AbstractControl = AbstractControl
+> =
+    DATA_TYPE
+    | GroupValueType<FormGroupInterface<DATA_TYPE>, DATA_TYPE>;
 
-export type FormRowDataType<
+export type FormRawDataType<
     DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractForm = AbstractForm
-> = DATA_TYPE | ControlRawValueType<FORM_TYPE, DATA_TYPE>;
+    FORM_TYPE extends AbstractControl = AbstractControl,
+> =
+    DATA_TYPE
+    | GroupRawValueType<FormGroupInterface<DATA_TYPE>, DATA_TYPE>;
 
 export type ArrayType<T> = T extends (infer U)[] ? U : never;
 export type isValueRecordForm<T> = T extends ValueRecordForm ? T : never;
@@ -55,7 +61,9 @@ export type FormGroupInterface<DATA_TYPE> = {
         : FormArrayItemType<DATA_TYPE[K]> | FormArray<FormControl<ArrayType<DATA_TYPE[K]> | null>>
 };
 
-export type FormControlType<DATA_TYPE> = DATA_TYPE extends (infer U)[] ? FormControl<U | null> : never
+export type FormGroupGeneric<DATA_TYPE> = {
+    [K in keyof DATA_TYPE]: any
+};
 
 export type FormArrayControlItemInterfaceType = 'control';
 
@@ -70,31 +78,24 @@ export type FormArrayItemInterfaceType<DATA_TYPE> = {
     validator: () => {}
 };
 
-export type AbstractArrayItemForm<DATA_TYPE = any> = FormControl<DATA_TYPE> | FormGroup<DATA_TYPE>;
-export type AbstractForm<DATA_TYPE = any> = AbstractArrayItemForm<DATA_TYPE> | FormArray<DATA_TYPE>;
+export type AbstractArrayItemForm<DATA_TYPE = any> = FormControl<DATA_TYPE> | FormGroup<FormGroupInterface<DATA_TYPE>>;
+export type AbstractForm<DATA_TYPE = any> =
+    AbstractArrayItemForm<DATA_TYPE>
+    | FormArray<AbstractArrayItemForm<DATA_TYPE>>;
 
 export type SupervisorType<
     DATA_TYPE,
     FORM_TYPE,
 > =
     FORM_TYPE extends FormArray
-        ? FormArraySupervisor<DATA_TYPE>
+        ? ControlValueType<FORM_TYPE> extends FormGroup
+            ? FormArrayGroupSupervisor<DATA_TYPE>
+            : FormArrayControlSupervisor<DATA_TYPE>
         : FORM_TYPE extends FormGroup
             ? DATA_TYPE extends ValueRecordForm
                 ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
                 : FormControlSupervisor<DATA_TYPE>
             : FormControlSupervisor<DATA_TYPE>
 
-/*export type SupervisorType<
-    DATA_TYPE,
-    FORM_TYPE extends FormControl | FormArray | FormGroup,
-> =
-    FORM_TYPE extends FormArray
-        ? FORM_TYPE extends FormGroup
-            ? FormArrayGroupSupervisor<DATA_TYPE>
-            : FormArrayControlSupervisor<DATA_TYPE>
-        : FORM_TYPE extends FormGroup
-            ? DATA_TYPE extends ValueRecordForm
-                ? FormGroupSupervisor<DATA_TYPE>
-                : FormControlSupervisor<DATA_TYPE>
-            : FormControlSupervisor<DATA_TYPE>*/
+export type GetFormGroupGenericClass<C, DATA_TYPE> =
+    C extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE>> ? T : never;

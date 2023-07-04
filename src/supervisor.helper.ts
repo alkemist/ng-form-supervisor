@@ -1,4 +1,4 @@
-import {FormArray, FormControl, FormGroup} from "@angular/forms";
+import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "./form-array-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
@@ -19,26 +19,45 @@ import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
 export abstract class SupervisorHelper {
     static factory<
         DATA_TYPE,
-        FORM_TYPE extends AbstractForm,
+        FORM_TYPE extends FormArray | FormGroup | FormControl,
         SUPERVISOR_TYPE = SupervisorType<DATA_TYPE, FORM_TYPE>
     >(
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        showLog = false,
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
 
         if (control instanceof FormArray) {
             if (control.at(0) instanceof FormGroup) {
-                supervisor = new FormArrayGroupSupervisor<DATA_TYPE>(control as FormArray, determineArrayIndexFn, itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>>);
+                supervisor = new FormArrayGroupSupervisor<DATA_TYPE>(
+                    control as FormArray,
+                    determineArrayIndexFn,
+                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>>,
+                    showLog
+                );
             } else {
-                supervisor = new FormArrayControlSupervisor<DATA_TYPE>(control as FormArray, determineArrayIndexFn, itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>>);
+                supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
+                    control as FormArray,
+                    determineArrayIndexFn,
+                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>>,
+                    showLog
+                );
             }
         } else if (control instanceof FormGroup) {
-            supervisor = new FormGroupSupervisor<DataType>(control as FormGroup<FormGroupInterface<DataType>>, determineArrayIndexFn);
+            supervisor = new FormGroupSupervisor<DataType>(
+                control as FormGroup<FormGroupInterface<DataType>>,
+                determineArrayIndexFn,
+                showLog
+            );
         } else {
-            supervisor = new FormControlSupervisor<DataType>(control as FormControl<DataType>, determineArrayIndexFn);
+            supervisor = new FormControlSupervisor<DataType>(
+                control as FormControl<DataType>,
+                determineArrayIndexFn,
+                showLog
+            );
         }
 
         return supervisor as SUPERVISOR_TYPE;
@@ -74,7 +93,7 @@ export abstract class SupervisorHelper {
 
     static extractFormGroupItemInterface<
         DATA_TYPE,
-        FORM_TYPE extends AbstractForm
+        FORM_TYPE extends AbstractControl
     >(control: FORM_TYPE): FormArrayItemInterfaceType<DATA_TYPE> {
         type DataType = ControlValueType<typeof control>;
         const itemInterface = control instanceof FormGroup

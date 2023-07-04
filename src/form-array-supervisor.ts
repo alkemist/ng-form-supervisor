@@ -20,10 +20,8 @@ export class FormArraySupervisor<
         ? FormControl<DATA_TYPE | null> | FormGroup<FormGroupInterface<DATA_TYPE>>
         : FormControl<DATA_TYPE | null>,
     SUPERVISOR_TYPE extends FormSupervisor<DATA_TYPE> =
-        DATA_TYPE extends ValueRecordForm
-            ? FORM_TYPE extends FormGroup
-                ? FormGroupSupervisor<DATA_TYPE>
-                : FormControlSupervisor<DATA_TYPE>
+        FORM_TYPE extends FormGroup
+            ? FormGroupSupervisor<DATA_TYPE>
             : FormControlSupervisor<DATA_TYPE>,
 > extends FormSupervisor<
     DATA_TYPE[],
@@ -36,15 +34,17 @@ export class FormArraySupervisor<
     constructor(
         items: FormArray<FORM_TYPE>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        showLog = false,
     ) {
-        super(determineArrayIndexFn);
+        super(determineArrayIndexFn, showLog);
+
         this._items = items;
         this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, FORM_TYPE>(this._items);
 
-        this.onChange(this.value);
-
         this.updateInitialValue();
+
+        this.onChange(this.value);
 
         this.sub.add(this.valueChanges.subscribe((itemsValue) => {
             this.onChange(itemsValue)
@@ -68,7 +68,7 @@ export class FormArraySupervisor<
     }
 
     get valueChanges(): Observable<ControlValueType<FormArray<FORM_TYPE>>> {
-        return this._items.valueChanges;
+        return this._items.valueChanges as Observable<ControlValueType<FormArray<FORM_TYPE>>>;
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
@@ -117,6 +117,15 @@ export class FormArraySupervisor<
         );
     }
 
+    updateInitialValue(value?: DATA_TYPE[] | undefined) {
+        if (value) {
+            this.supervisors.forEach((supervisor, index) =>
+                supervisor.updateInitialValue(value[index]))
+        }
+
+        super.updateInitialValue(value);
+    }
+
     protected onChange(itemsValue: DATA_TYPE[] | undefined) {
         super.onChange(itemsValue);
         this.supervisors = [];
@@ -128,7 +137,7 @@ export class FormArraySupervisor<
 
                     const supervisor =
                         SupervisorHelper.factory<DATA_TYPE[], FORM_TYPE, SUPERVISOR_TYPE>(
-                            control, this.determineArrayIndexFn
+                            control, this.determineArrayIndexFn, undefined, this.showLog
                         )
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
@@ -156,9 +165,10 @@ export class FormArrayControlSupervisor<
     constructor(
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        showLog = false,
     ) {
-        super(items, determineArrayIndexFn, itemType);
+        super(items, determineArrayIndexFn, itemType, showLog);
     }
 }
 
@@ -172,8 +182,9 @@ export class FormArrayGroupSupervisor<
     constructor(
         items: FormArray<FormGroup<FormGroupInterface<DATA_TYPE>>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        showLog = false,
     ) {
-        super(items, determineArrayIndexFn, itemType);
+        super(items, determineArrayIndexFn, itemType, showLog);
     }
 }

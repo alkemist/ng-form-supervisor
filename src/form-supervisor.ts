@@ -1,18 +1,22 @@
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {AbstractForm, ControlValueType, FormDataType, FormRowDataType, ValueFormNullable} from "./form.type.js";
+import {FormDataType, FormRawDataType, ValueFormNullable} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
+import {AbstractControl} from "@angular/forms";
 
 export abstract class FormSupervisor<
     DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractForm = AbstractForm
+    FORM_TYPE extends AbstractControl = AbstractControl
 > {
-    public compareEngine: CompareEngine<FormDataType<DATA_TYPE, FORM_TYPE>>;
+    public compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
     protected sub: Subscription = new Subscription();
     private destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
 
-    protected constructor(protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey)) {
-        this.compareEngine = new CompareEngine<DATA_TYPE | ControlValueType<FORM_TYPE>>(determineArrayIndexFn)
+    protected constructor(
+        protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey),
+        public showLog = false
+    ) {
+        this.compareEngine = new CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>(determineArrayIndexFn)
 
         this.destructor = new FinalizationRegistry(() => {
             this.sub.unsubscribe();
@@ -27,14 +31,14 @@ export abstract class FormSupervisor<
 
     abstract get valueChanges(): Observable<FormDataType<DATA_TYPE, FORM_TYPE>>;
 
-    abstract setValue(value: FormRowDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
+    abstract setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
 
     // @TODO
     //abstract patchValue(value: DATA_TYPE | ControlRawValueType<FORM_TYPE> | undefined, options?: FormOptions): void;
 
     abstract reset(options?: FormOptions): void;
 
-    updateInitialValue(value?: FormRowDataType<DATA_TYPE, FORM_TYPE>) {
+    updateInitialValue(value?: FormRawDataType<DATA_TYPE, FORM_TYPE>) {
         if (value) {
             this.compareEngine.updateLeft(value);
         } else {
