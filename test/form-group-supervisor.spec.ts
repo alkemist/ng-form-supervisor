@@ -112,8 +112,9 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.getFormProperty("groups").at(0)).toBeInstanceOf(FormControl);
         expect(supervisor.getFormProperty("profiles")).toBeInstanceOf(FormArray);
         expect(supervisor.getFormProperty("profiles").at(0)).toBeInstanceOf(FormGroup);
+        expect(supervisor.getFormProperty("profiles").at(0).get('username')).toBeInstanceOf(FormControl);
         expect(supervisor.getFormProperty("rights")).toBeInstanceOf(FormGroup);
-        expect(supervisor.getFormProperty("rights")).toBeInstanceOf(FormGroup);
+        expect(supervisor.getFormProperty("rights").get('viewProfile')).toBeInstanceOf(FormControl);
 
         expect(supervisor.hasChange()).toBe(false);
         expect(supervisor.valid).toBe(true);

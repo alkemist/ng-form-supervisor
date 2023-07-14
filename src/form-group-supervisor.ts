@@ -31,8 +31,7 @@ export class FormGroupSupervisor<
 
     constructor(
         protected group: FORM_GROUP_TYPE,
-        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        showLog = false
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined
     ) {
         super(determineArrayIndexFn);
 
@@ -68,7 +67,7 @@ export class FormGroupSupervisor<
 
     static create<
         D,
-        F extends FormGroup<FormGroupGeneric<D>>
+        F extends FormGroup<FormGroupGeneric<D>> = FormGroup<FormGroupGeneric<D>>
     >(data: D, group: F): FormGroupSupervisor<D, F> {
         return new FormGroupSupervisor<D, F>(group)
     }

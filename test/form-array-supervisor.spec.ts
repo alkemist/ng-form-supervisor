@@ -161,7 +161,7 @@ function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
     expect(array.at(1).valid).toBe(false);
     expect(array.valid).toBe(false);
 
-    /*supervisor.splice(0, 1);
+    supervisor.splice(0, 1);
 
     expect(array.value).toEqual([
         testData.invalidItem,
@@ -221,5 +221,5 @@ function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
         testData.initialValidItem,
         testData.newValidItem,
     ]);
-    expect(array.valid).toBe(true);*/
+    expect(array.valid).toBe(true);
 }
