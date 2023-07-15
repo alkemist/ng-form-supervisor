@@ -1,44 +1,15 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
-import {USER_GROUP, UserProfile, UserRights} from "./test-data";
+import {ComplexeUser, USER_GROUP, UserProfile, UserRights} from "./test-data";
 import {FormGroupSupervisor} from "../src/form-group-supervisor";
 import {FormControlSupervisor} from "../src/form-control-supervisor";
 import {FormGroupInterface} from "../src/form.type";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
+import {FormSupervisor} from "../src/form-supervisor";
 
 describe("FormGroupSupervisor", () => {
     it("Basic", () => {
-        const group =
-            new FormGroup<{
-                id: FormControl<number | null>,
-                name: FormControl<string | null>,
-                groups: FormArray<FormControl<USER_GROUP | null>>,
-                profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
-                rights: FormGroup<FormGroupInterface<UserRights>>
-            }>({
-                id: new FormControl<number | null>(1),
-                name: new FormControl<string | null>("user 1", [
-                    Validators.required,
-                    Validators.minLength(3),
-                ]),
-                groups: new FormArray<FormControl<USER_GROUP | null>>([
-                    new FormControl<USER_GROUP>("USER")
-                ], [Validators.required]),
-                profiles: new FormArray<FormGroup<FormGroupInterface<UserProfile>>>([
-                    new FormGroup<FormGroupInterface<UserProfile>>({
-                        username: new FormControl<string>("username1", [Validators.required]),
-                        avatar: new FormControl<string | null>(null),
-                    })
-                ], [Validators.required]),
-                rights: new FormGroup<FormGroupInterface<UserRights>>({
-                    viewProfile: new FormControl<boolean>(true),
-                    viewUsers: new FormControl<boolean>(false),
-                }),
-            });
-
-        expect(group).toBeTruthy()
-
-        const initialValue = {
+        const initialValue: ComplexeUser = {
             id: 1,
             name: "user 1",
             groups: ["USER"],
@@ -54,58 +25,41 @@ describe("FormGroupSupervisor", () => {
             }
         }
 
-        /*const supervisor =
-            new FormGroupSupervisor<{
-                id: number | null,
-                name: string
-                groups: USER_GROUP[],
-                profiles: UserProfile[]
-                rights: UserRights
-            }, {
-                id: FormControl<number | null>,
-                name: FormControl<string | null>,
-                groups: FormArray<FormControl<USER_GROUP | null>>,
-                profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
-                rights: FormGroup<FormGroupInterface<UserRights>>
-            }>(group);*/
+        const group =
+            new FormGroup({
+                id: new FormControl<number | null>(initialValue.id),
+                name: new FormControl<string | null>(initialValue.name, [
+                    Validators.required,
+                    Validators.minLength(3),
+                ]),
+                groups: new FormArray([
+                    new FormControl<USER_GROUP>(initialValue.groups[0])
+                ], [Validators.required]),
+                profiles: new FormArray([
+                    new FormGroup<FormGroupInterface<UserProfile>>({
+                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
+                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
+                    })
+                ], [Validators.required]),
+                rights: new FormGroup<FormGroupInterface<UserRights>>({
+                    viewProfile: new FormControl<boolean>(initialValue.rights.viewProfile),
+                    viewUsers: new FormControl<boolean>(initialValue.rights.viewUsers),
+                }),
+            });
 
-        const supervisor = FormGroupSupervisor.create<{
-            id: number | null,
-            name: string
-            groups: USER_GROUP[],
-            profiles: UserProfile[]
-            rights: UserRights
-        }, FormGroup<{
-            id: FormControl<number | null>,
-            name: FormControl<string | null>,
-            groups: FormArray<FormControl<USER_GROUP | null>>,
-            profiles: FormArray<FormGroup<FormGroupInterface<UserProfile>>>,
-            rights: FormGroup<FormGroupInterface<UserRights>>
-        }>>({
-            id: 1,
-            name: "user 1",
-            groups: ["USER"],
-            profiles: [
-                {
-                    username: "username1",
-                    avatar: ""
-                }
-            ],
-            rights: {
-                viewProfile: true,
-                viewUsers: false
-            }
-        }, group);
+        const supervisor =
+            new FormGroupSupervisor(group, group.value as ComplexeUser);
 
         expect(supervisor.value).toEqual(initialValue);
 
         expect(supervisor.get("name")).toBeInstanceOf(FormControlSupervisor);
         expect(supervisor.get("groups")).toBeInstanceOf(FormArrayControlSupervisor);
         expect(supervisor.get("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
-        expect(supervisor.get("groups").at(0)).toBeInstanceOf(FormControlSupervisor);
         expect(supervisor.get("profiles")).toBeInstanceOf(FormArrayGroupSupervisor);
         expect(supervisor.get("profiles").at(0)).toBeInstanceOf(FormGroupSupervisor);
+        expect(supervisor.get("profiles").at(0).get('username')).toBeInstanceOf(FormControlSupervisor);
         expect(supervisor.get("rights")).toBeInstanceOf(FormGroupSupervisor);
+        expect(supervisor.get("rights").get("viewProfile")).toBeInstanceOf(FormControlSupervisor);
 
         expect(supervisor.getFormProperty("name")).toBeInstanceOf(FormControl);
         expect(supervisor.getFormProperty("groups")).toBeInstanceOf(FormArray);

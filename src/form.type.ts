@@ -87,15 +87,32 @@ export type SupervisorType<
     DATA_TYPE,
     FORM_TYPE,
 > =
-    FORM_TYPE extends FormArray
-        ? ControlValueType<FORM_TYPE> extends FormGroup
-            ? FormArrayGroupSupervisor<DATA_TYPE>
-            : FormArrayControlSupervisor<DATA_TYPE>
-        : FORM_TYPE extends FormGroup
-            ? DATA_TYPE extends ValueRecordForm
-                ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
+    DATA_TYPE extends (infer DATA_TYPE_ITEM)[]
+        ? FORM_TYPE extends FormArray
+            ? ControlValueType<FORM_TYPE> extends FormGroup
+                ? FormArrayGroupSupervisor<DATA_TYPE_ITEM>
+                : FormArrayControlSupervisor<DATA_TYPE_ITEM>
+            : FORM_TYPE extends FormGroup
+                ? DATA_TYPE_ITEM extends ValueRecordForm
+                    ? FormGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE>
+                    : FormControlSupervisor<DATA_TYPE_ITEM>
+                : FormControlSupervisor<DATA_TYPE_ITEM>
+        : FORM_TYPE extends FormArray
+            ? ControlValueType<FORM_TYPE> extends FormGroup
+                ? FormArrayGroupSupervisor<DATA_TYPE>
+                : FormArrayControlSupervisor<DATA_TYPE>
+            : FORM_TYPE extends FormGroup
+                ? DATA_TYPE extends ValueRecordForm
+                    ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
+                    : FormControlSupervisor<DATA_TYPE>
                 : FormControlSupervisor<DATA_TYPE>
-            : FormControlSupervisor<DATA_TYPE>
 
-export type GetFormGroupGenericClass<C, DATA_TYPE> =
-    C extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE>> ? T : never;
+
+export type GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE> =
+    DATA_TYPE extends (infer DATA_TYPE_ITEM)[]
+        ? FORM_GROUP extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE_ITEM>>
+            ? T
+            : never
+        : FORM_GROUP extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE>>
+            ? T
+            : never;

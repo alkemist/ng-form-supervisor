@@ -49,14 +49,13 @@ export abstract class SupervisorHelper {
         } else if (control instanceof FormGroup) {
             supervisor = new FormGroupSupervisor<DataType>(
                 control as FormGroup<FormGroupInterface<DataType>>,
+                control.value,
                 determineArrayIndexFn,
-                showLog
             );
         } else {
             supervisor = new FormControlSupervisor<DataType>(
                 control as FormControl<DataType>,
                 determineArrayIndexFn,
-                showLog
             );
         }
 

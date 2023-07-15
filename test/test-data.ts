@@ -7,9 +7,9 @@ export interface BasicUser {
 
 export type USER_GROUP = "USER" | "ADMIN"
 
-export interface UserProfile extends GenericValueRecord<string> {
+export interface UserProfile extends GenericValueRecord<string | null> {
     username: string,
-    avatar: string,
+    avatar: string | null,
 }
 
 export interface UserRights extends GenericValueRecord<boolean> {

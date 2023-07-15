@@ -14,8 +14,14 @@ import {
 } from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 
-type SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>>> = {
-    [K in keyof DATA_TYPE]: SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>
+type SupervisorRecord<
+    DATA_TYPE,
+    FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>>,
+> = {
+    [K in keyof DATA_TYPE]: SupervisorType<
+        DATA_TYPE[K],
+        GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]
+    >
 }
 
 export class FormGroupSupervisor<
@@ -31,6 +37,7 @@ export class FormGroupSupervisor<
 
     constructor(
         protected group: FORM_GROUP_TYPE,
+        data: DATA_TYPE = group.value as DATA_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined
     ) {
         super(determineArrayIndexFn);
@@ -43,19 +50,19 @@ export class FormGroupSupervisor<
             .reduce((supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>, property: keyof DATA_TYPE) => {
                 const control = this.controls[property] as FormGroup | FormArray | FormControl;
                 type DataType = ControlValueType<typeof control>;
+                type SubDataType = DataType extends (infer U)[] ? U : DataType;
 
-                const supervisor = SupervisorHelper.factory<
-                    DataType,
-                    typeof control
+                supervisors[property] = SupervisorHelper.factory<
+                    SubDataType,
+                    typeof control,
+                    SupervisorType<
+                        DATA_TYPE[any],
+                        GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[any]
+                    >
                 >(
                     control,
                     determineArrayIndexFn,
                 );
-
-                supervisors[property] = supervisor as SupervisorType<
-                    DataType,
-                    GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[keyof DATA_TYPE]
-                >
 
                 return supervisors;
             }, {} as SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>);
@@ -65,12 +72,12 @@ export class FormGroupSupervisor<
         }));
     }
 
-    static create<
+    /*static create<
         D,
-        F extends FormGroup<FormGroupGeneric<D>> = FormGroup<FormGroupGeneric<D>>
-    >(data: D, group: F): FormGroupSupervisor<D, F> {
+        F extends FormGroup<FormGroupGeneric<D>>
+    >(group: F, data: D = group.value as D): FormGroupSupervisor<D, F> {
         return new FormGroupSupervisor<D, F>(group)
-    }
+    }*/
 
     get form(): FORM_GROUP_TYPE {
         return this.group as FORM_GROUP_TYPE;
