@@ -21,7 +21,7 @@ export class FormArraySupervisor<
         : FormControl<DATA_TYPE | null>,
     SUPERVISOR_TYPE extends FormSupervisor<DATA_TYPE> =
         FORM_TYPE extends FormGroup
-            ? FormGroupSupervisor<DATA_TYPE>
+            ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
             : FormControlSupervisor<DATA_TYPE>,
 > extends FormSupervisor<
     DATA_TYPE[],
@@ -177,7 +177,7 @@ export class FormArrayGroupSupervisor<
 > extends FormArraySupervisor<
     DATA_TYPE,
     FormGroup<FormGroupInterface<DATA_TYPE>>,
-    FormGroupSupervisor<DATA_TYPE>
+    FormGroupSupervisor<DATA_TYPE, FormGroup<FormGroupInterface<DATA_TYPE>>>
 > {
     constructor(
         items: FormArray<FormGroup<FormGroupInterface<DATA_TYPE>>>,

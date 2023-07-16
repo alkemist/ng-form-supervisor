@@ -5,7 +5,6 @@ import {FormGroupSupervisor} from "../src/form-group-supervisor";
 import {FormControlSupervisor} from "../src/form-control-supervisor";
 import {FormGroupInterface} from "../src/form.type";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
-import {FormSupervisor} from "../src/form-supervisor";
 
 describe("FormGroupSupervisor", () => {
     it("Basic", () => {
@@ -42,8 +41,8 @@ describe("FormGroupSupervisor", () => {
                     })
                 ], [Validators.required]),
                 rights: new FormGroup<FormGroupInterface<UserRights>>({
-                    viewProfile: new FormControl<boolean>(initialValue.rights.viewProfile),
-                    viewUsers: new FormControl<boolean>(initialValue.rights.viewUsers),
+                    viewProfile: new FormControl<boolean | null>(initialValue.rights.viewProfile),
+                    viewUsers: new FormControl<boolean | null>(initialValue.rights.viewUsers),
                 }),
             });
 
@@ -140,6 +139,17 @@ describe("FormGroupSupervisor", () => {
         expect(group.get("groups")?.value).toEqual(initialValue.groups);
         expect(group.get("profiles")?.value).toEqual(initialValue.profiles);
         expect(group.get("rights")?.value).toEqual(initialValue.rights);
+
+        supervisor.get("name").setValue("us");
+        supervisor.get('groups').remove(0);
+        supervisor.get('groups').add("ADMIN");
+        supervisor.get("profiles").add({
+            username: "username2",
+            avatar: null
+        });
+        const rightsSupervisor = supervisor.get("rights");
+        const viewUsersSupervisor = rightsSupervisor.get("viewUsers");
+        //supervisor.get("rights").get("viewUsers").setValue(true)
 
         /*group.setValue({id: 1, name: "user 1"})
 

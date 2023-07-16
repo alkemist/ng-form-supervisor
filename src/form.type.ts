@@ -17,31 +17,29 @@ export interface ValueArrayForm extends Array<ValueFormNullable> {
 
 export declare type ControlValueType<T extends AbstractControl> = T extends AbstractForm ? T['value'] : never;
 
-export type GroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<DATA_TYPE>, DATA_TYPE>
+export type GroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
     = { [K in keyof FORM_GROUP_INTERFACE]: ControlValueType<FORM_GROUP_INTERFACE[K]>; }
 
 export declare type ControlRawValueType<T extends AbstractControl>
     = T extends AbstractControl ? (T['setValue'] extends ((v: infer R) => void) ? R : never) : never;
 
-export type GroupRawValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<DATA_TYPE>, DATA_TYPE>
+export type GroupRawValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
     = { [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>; }
 
-export type GroupRawValueType2<FORM_GROUP extends FormGroup<FormGroupGeneric<DATA_TYPE>>, DATA_TYPE>
-    = { [K in keyof DATA_TYPE]: ControlRawValueType<GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE>[K]>; }
 
 export type FormDataType<
-    DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractControl = AbstractControl
+    DATA_TYPE,
+    FORM_TYPE extends AbstractControl
 > =
-    DATA_TYPE
-    | GroupValueType<FormGroupInterface<DATA_TYPE>, DATA_TYPE>;
+    DATA_TYPE | GroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
+
 
 export type FormRawDataType<
-    DATA_TYPE = ValueFormNullable,
-    FORM_TYPE extends AbstractControl = AbstractControl,
+    DATA_TYPE,
+    FORM_TYPE extends FormGroupInterface<DATA_TYPE> | AbstractControl,
 > =
     DATA_TYPE
-    | GroupRawValueType<FormGroupInterface<DATA_TYPE>, DATA_TYPE>;
+    | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
 
 export type ArrayType<T> = T extends (infer U)[] ? U : never;
 export type isValueRecordForm<T> = T extends ValueRecordForm ? T : never;

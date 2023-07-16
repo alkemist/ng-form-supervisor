@@ -4,11 +4,10 @@ import {ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
 import {
-    ControlRawValueType,
     ControlValueType,
     FormGroupGeneric,
-    FormRawDataType,
     GetFormGroupGenericClass,
+    GroupRawValueType,
     GroupValueType,
     SupervisorType
 } from "./form.type.js";
@@ -26,7 +25,7 @@ type SupervisorRecord<
 
 export class FormGroupSupervisor<
     DATA_TYPE,
-    FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>> = FormGroup<FormGroupGeneric<DATA_TYPE>>,
+    FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>>,
 >
     extends FormSupervisor<
         DATA_TYPE,
@@ -34,7 +33,7 @@ export class FormGroupSupervisor<
     > {
 
     supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>;
-
+    
     constructor(
         protected group: FORM_GROUP_TYPE,
         data: DATA_TYPE = group.value as DATA_TYPE,
@@ -99,7 +98,7 @@ export class FormGroupSupervisor<
         return this.group.controls as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>;
     }
 
-    setValue(value: { [K in keyof DATA_TYPE]: ControlRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>; }, options?: FormOptions) {
+    setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
         this.group.setValue(value, options);
     }
 
@@ -107,11 +106,11 @@ export class FormGroupSupervisor<
         this.group.reset();
     }
 
-    updateInitialValue(value?: { [K in keyof DATA_TYPE]: ControlRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>; }) {
+    updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
         if (value) {
             const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
             properties.forEach((property) => {
-                (this.get(property) as FormSupervisor).updateInitialValue(value[property] as FormRawDataType);
+                (this.get(property) as FormSupervisor).updateInitialValue(value[property] as GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>);
             })
         }
 

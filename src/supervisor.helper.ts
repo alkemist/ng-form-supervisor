@@ -47,8 +47,8 @@ export abstract class SupervisorHelper {
                 );
             }
         } else if (control instanceof FormGroup) {
-            supervisor = new FormGroupSupervisor<DataType>(
-                control as FormGroup<FormGroupInterface<DataType>>,
+            supervisor = new FormGroupSupervisor<DataType, typeof control>(
+                control,
                 control.value,
                 determineArrayIndexFn,
             );

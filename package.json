@@ -1,7 +1,7 @@
 {
   "name": "@alkemist/ng-form-supervisor",
   "version": "0.0.1",
-  "description": "Angular Smart Form",
+  "description": "Angular Form Supervisor",
   "main": "lib/index.min.mjs",
   "type": "module",
   "types": "lib/index.d.ts",

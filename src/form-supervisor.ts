@@ -1,11 +1,11 @@
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {FormDataType, FormRawDataType, ValueFormNullable} from "./form.type.js";
+import {FormDataType, FormRawDataType} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {AbstractControl} from "@angular/forms";
 
 export abstract class FormSupervisor<
-    DATA_TYPE = ValueFormNullable,
+    DATA_TYPE = any,
     FORM_TYPE extends AbstractControl = AbstractControl
 > {
     public compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
