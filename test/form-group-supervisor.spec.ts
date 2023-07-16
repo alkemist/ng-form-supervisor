@@ -1,9 +1,8 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
-import {ComplexeUser, USER_GROUP, UserProfile, UserRights} from "./test-data";
+import {ComplexeUser, USER_GROUP} from "./test-data";
 import {FormGroupSupervisor} from "../src/form-group-supervisor";
 import {FormControlSupervisor} from "../src/form-control-supervisor";
-import {FormGroupInterface} from "../src/form.type";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
 
 describe("FormGroupSupervisor", () => {
@@ -34,13 +33,35 @@ describe("FormGroupSupervisor", () => {
                 groups: new FormArray([
                     new FormControl<USER_GROUP>(initialValue.groups[0])
                 ], [Validators.required]),
-                profiles: new FormArray([
-                    new FormGroup<FormGroupInterface<UserProfile>>({
+
+                profiles: new FormArray<
+                    FormGroup<{
+                        username: FormControl<string | null>,
+                        avatar: FormControl<string | null>,
+                    }>
+                >([
+                    new FormGroup<{
+                        username: FormControl<string | null>,
+                        avatar: FormControl<string | null>,
+                    }>({
                         username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
                         avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
                     })
                 ], [Validators.required]),
-                rights: new FormGroup<FormGroupInterface<UserRights>>({
+                /*profiles: new FormArray([
+                    new FormGroup({
+                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
+                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
+                    })
+                ], [Validators.required]),*/
+                /*profiles: new FormArray([
+                    new FormGroup<FormGroupInterface<UserProfile>>({
+                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
+                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
+                    })
+                ], [Validators.required]),*/
+
+                rights: new FormGroup({
                     viewProfile: new FormControl<boolean | null>(initialValue.rights.viewProfile),
                     viewUsers: new FormControl<boolean | null>(initialValue.rights.viewUsers),
                 }),
@@ -74,7 +95,7 @@ describe("FormGroupSupervisor", () => {
 
         group.get("name")?.setValue("us");
         (group.get("groups") as FormArray)?.removeAt(0);
-        (group.get("profiles") as FormArray)?.push(new FormGroup<FormGroupInterface<UserProfile>>({
+        (group.get("profiles") as FormArray)?.push(new FormGroup({
             username: new FormControl<string>("", [Validators.required]),
             avatar: new FormControl<string | null>(null),
         }));
@@ -147,8 +168,24 @@ describe("FormGroupSupervisor", () => {
             username: "username2",
             avatar: null
         });
+
+        const supervisors = supervisor.supervisors;
+
+        const nameSupervisor = supervisor.get('name');
+
+        const groupsSupervisor = supervisor.get('groups');
+        const groupSupervisor = groupsSupervisor.at(0);
+        groupSupervisor.setValue("ADMIN");
+
+        const profilesSupervisor = supervisor.get('profiles');
+        const profileSupervisor = profilesSupervisor.at(0);
+        const usernameSupervisor = profileSupervisor.get("username");
+        //usernameSupervisor.setValue("username2");
+
         const rightsSupervisor = supervisor.get("rights");
-        const viewUsersSupervisor = rightsSupervisor.get("viewUsers");
+        const viewUsersSupervisor = rightsSupervisor.get("viewUsers")
+        viewUsersSupervisor.setValue(true);
+
         //supervisor.get("rights").get("viewUsers").setValue(true)
 
         /*group.setValue({id: 1, name: "user 1"})

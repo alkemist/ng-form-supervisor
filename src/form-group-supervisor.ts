@@ -33,7 +33,7 @@ export class FormGroupSupervisor<
     > {
 
     supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>;
-    
+
     constructor(
         protected group: FORM_GROUP_TYPE,
         data: DATA_TYPE = group.value as DATA_TYPE,
@@ -70,13 +70,6 @@ export class FormGroupSupervisor<
             super.onChange(value)
         }));
     }
-
-    /*static create<
-        D,
-        F extends FormGroup<FormGroupGeneric<D>>
-    >(group: F, data: D = group.value as D): FormGroupSupervisor<D, F> {
-        return new FormGroupSupervisor<D, F>(group)
-    }*/
 
     get form(): FORM_GROUP_TYPE {
         return this.group as FORM_GROUP_TYPE;

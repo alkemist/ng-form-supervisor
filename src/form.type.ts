@@ -36,7 +36,7 @@ export type FormDataType<
 
 export type FormRawDataType<
     DATA_TYPE,
-    FORM_TYPE extends FormGroupInterface<DATA_TYPE> | AbstractControl,
+    FORM_TYPE,
 > =
     DATA_TYPE
     | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
@@ -87,30 +87,33 @@ export type SupervisorType<
 > =
     DATA_TYPE extends (infer DATA_TYPE_ITEM)[]
         ? FORM_TYPE extends FormArray
-            ? ControlValueType<FORM_TYPE> extends FormGroup
+            ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup
                 ? FormArrayGroupSupervisor<DATA_TYPE_ITEM>
                 : FormArrayControlSupervisor<DATA_TYPE_ITEM>
             : FORM_TYPE extends FormGroup
-                ? DATA_TYPE_ITEM extends ValueRecordForm
-                    ? FormGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE>
-                    : FormControlSupervisor<DATA_TYPE_ITEM>
+                ? FormGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE>
                 : FormControlSupervisor<DATA_TYPE_ITEM>
         : FORM_TYPE extends FormArray
-            ? ControlValueType<FORM_TYPE> extends FormGroup
+            ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup
                 ? FormArrayGroupSupervisor<DATA_TYPE>
                 : FormArrayControlSupervisor<DATA_TYPE>
             : FORM_TYPE extends FormGroup
-                ? DATA_TYPE extends ValueRecordForm
-                    ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
+                ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
+                : DATA_TYPE extends boolean
+                    ? FormControlSupervisor<boolean>
                     : FormControlSupervisor<DATA_TYPE>
-                : FormControlSupervisor<DATA_TYPE>
 
 
 export type GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE> =
     DATA_TYPE extends (infer DATA_TYPE_ITEM)[]
-        ? FORM_GROUP extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE_ITEM>>
+        ? FORM_GROUP extends FormGroup<infer T>
             ? T
             : never
-        : FORM_GROUP extends FormGroup<infer T extends FormGroupInterface<DATA_TYPE>>
+        : FORM_GROUP extends FormGroup<infer T>
             ? T
             : never;
+
+export type GetFormArrayGenericClass<FORM_GROUP, > =
+    FORM_GROUP extends FormArray<infer T extends AbstractControl>
+        ? T
+        : never;
