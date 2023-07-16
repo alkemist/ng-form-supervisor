@@ -3,44 +3,36 @@ import {Observable} from "rxjs";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
-import {
-    AbstractArrayItemForm,
-    ControlValueType,
-    FormArrayItemInterfaceType,
-    FormGroupInterface,
-    ValueRecordForm
-} from "./form.type.js";
+import {ControlValueType, FormArrayItemInterfaceType, GetFormArrayGenericClass} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 
 export class FormArraySupervisor<
     DATA_TYPE,
-    FORM_TYPE extends AbstractArrayItemForm = DATA_TYPE extends ValueRecordForm
-        ? FormControl<DATA_TYPE | null> | FormGroup<FormGroupInterface<DATA_TYPE>>
-        : FormControl<DATA_TYPE | null>,
+    FORM_TYPE extends FormArray,
     SUPERVISOR_TYPE extends FormSupervisor<DATA_TYPE> =
-        FORM_TYPE extends FormGroup
-            ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
+        GetFormArrayGenericClass<FORM_TYPE> extends FormGroup
+            ? FormGroupSupervisor<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>
             : FormControlSupervisor<DATA_TYPE>,
 > extends FormSupervisor<
     DATA_TYPE[],
-    FormArray<FORM_TYPE>
+    FORM_TYPE
 > {
-    protected itemType: FormArrayItemInterfaceType<DATA_TYPE>;
+    protected itemType: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>;
     protected supervisors: SUPERVISOR_TYPE[] = [];
-    protected _items: FormArray<FORM_TYPE>;
+    protected _items: FORM_TYPE;
 
     constructor(
-        items: FormArray<FORM_TYPE>,
+        items: FORM_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
         showLog = false,
     ) {
         super(determineArrayIndexFn, showLog);
 
         this._items = items;
-        this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, FORM_TYPE>(this._items);
+        this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(this._items);
 
         this.updateInitialValue();
 
@@ -51,7 +43,7 @@ export class FormArraySupervisor<
         }));
     }
 
-    get form(): FormArray<FORM_TYPE> {
+    get form(): FORM_TYPE {
         return this._items;
     }
 
@@ -67,8 +59,8 @@ export class FormArraySupervisor<
         return this._items.value;
     }
 
-    get valueChanges(): Observable<ControlValueType<FormArray<FORM_TYPE>>> {
-        return this._items.valueChanges as Observable<ControlValueType<FormArray<FORM_TYPE>>>;
+    get valueChanges(): Observable<ControlValueType<FormArray<GetFormArrayGenericClass<FORM_TYPE>>>> {
+        return this._items.valueChanges as Observable<ControlValueType<FormArray<GetFormArrayGenericClass<FORM_TYPE>>>>;
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
@@ -95,8 +87,8 @@ export class FormArraySupervisor<
     }
 
     add(itemValue: DATA_TYPE, options?: FormOptions) {
-        const item = SupervisorHelper.factoryItem<DATA_TYPE, FORM_TYPE>(
-            this.itemType as FormArrayItemInterfaceType<DATA_TYPE>,
+        const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
+            this.itemType as FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
             itemValue
         );
 
@@ -133,10 +125,10 @@ export class FormArraySupervisor<
         if (itemsValue) {
             if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
                 itemsValue.forEach((itemValue, index) => {
-                    const control = this._items.controls[index] as FORM_TYPE;
+                    const control = this._items.controls[index] as GetFormArrayGenericClass<FORM_TYPE>;
 
                     const supervisor =
-                        SupervisorHelper.factory<DATA_TYPE[], FORM_TYPE, SUPERVISOR_TYPE>(
+                        SupervisorHelper.factory<DATA_TYPE[], GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
                             control, this.determineArrayIndexFn, undefined, this.showLog
                         )
 
@@ -159,13 +151,12 @@ export class FormArrayControlSupervisor<
     DATA_TYPE
 > extends FormArraySupervisor<
     DATA_TYPE,
-    FormControl<DATA_TYPE | null>,
-    FormControlSupervisor<DATA_TYPE>
+    FormArray<FormControl<DATA_TYPE | null>>
 > {
     constructor(
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
         showLog = false,
     ) {
         super(items, determineArrayIndexFn, itemType, showLog);
@@ -173,16 +164,17 @@ export class FormArrayControlSupervisor<
 }
 
 export class FormArrayGroupSupervisor<
-    DATA_TYPE
+    DATA_TYPE,
+    FORM_TYPE extends FormArray,
 > extends FormArraySupervisor<
     DATA_TYPE,
-    FormGroup<FormGroupInterface<DATA_TYPE>>,
-    FormGroupSupervisor<DATA_TYPE, FormGroup<FormGroupInterface<DATA_TYPE>>>
+    FORM_TYPE
 > {
     constructor(
-        items: FormArray<FormGroup<FormGroupInterface<DATA_TYPE>>>,
+        items: FORM_TYPE,
+        values: DATA_TYPE[],
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE>,
+        itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
         showLog = false,
     ) {
         super(items, determineArrayIndexFn, itemType, showLog);

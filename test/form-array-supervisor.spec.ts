@@ -3,30 +3,37 @@ import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {BasicUser} from "./test-data";
 import {FormGroupSupervisor} from "../src/form-group-supervisor";
 import {FormControlSupervisor} from "../src/form-control-supervisor";
-import {FormGroupInterface} from "../src/form.type";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
 
 describe("FormArraySupervisor", () => {
     it("Users group array", () => {
-        const array = new FormArray<FormGroup<FormGroupInterface<BasicUser>>>([
-            new FormGroup<FormGroupInterface<BasicUser>>({
+        const array = new FormArray([
+            new FormGroup({
                 id: new FormControl<number | null>(1),
                 name: new FormControl<string>("user 1", [Validators.required]),
             })
         ]);
+
         const supervisor
-            = new FormArrayGroupSupervisor<BasicUser>(array, undefined, undefined);
+            = new FormArrayGroupSupervisor(array, array.value as {
+            id: number | null,
+            name: string
+        }[], undefined, undefined);
 
         testFormArray(array, supervisor, {
             initialValidItem: {id: 1, name: "user 1"},
             invalidItem: {id: null, name: ""},
-            newInvalidElement: new FormGroup<FormGroupInterface<BasicUser>>({
+            newInvalidElement: new FormGroup<{
+                id: FormControl<number | null>,
+                name: FormControl<string | null>,
+            }>({
                 id: new FormControl<number | null>(null),
                 name: new FormControl<string>("", [Validators.required]),
             }),
             newValidItem: {id: 2, name: "user 2"},
-            invalidFirstItem: {id: 1, name: ""}
-        }, true);
+            invalidFirstItem: {id: 1, name: ""},
+            resetValue: {id: null, name: null}
+        });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormGroupSupervisor);
         expect(supervisor.at(0).get('id')).toBeInstanceOf(FormControlSupervisor);
@@ -40,12 +47,13 @@ describe("FormArraySupervisor", () => {
         const supervisor
             = new FormArrayControlSupervisor<number>(array);
 
-        testFormArray<number | null, FormControl>(array, supervisor, {
+        testFormArray<number | null, FormArray<FormControl>, FormControl>(array, supervisor, {
             initialValidItem: 5,
             invalidItem: null,
             newInvalidElement: new FormControl<number | null>(null, [Validators.required]),
             newValidItem: 99,
-            invalidFirstItem: null
+            invalidFirstItem: null,
+            resetValue: null
         });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
@@ -59,12 +67,13 @@ describe("FormArraySupervisor", () => {
         const supervisor
             = new FormArrayControlSupervisor<BasicUser>(array);
 
-        testFormArray<BasicUser | null, FormControl>(array, supervisor, {
+        testFormArray<BasicUser | null, FormArray<FormControl>, FormControl>(array, supervisor, {
             initialValidItem: {id: 1, name: "user 1"},
             invalidItem: null,
             newInvalidElement: new FormControl<BasicUser | null>(null, [Validators.required]),
             newValidItem: {id: 2, name: "user 2"},
-            invalidFirstItem: null
+            invalidFirstItem: null,
+            resetValue: null
         });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
@@ -79,14 +88,18 @@ interface FormArrayTestData<
     invalidItem: DATA_TYPE,
     newInvalidElement: FORM_TYPE,
     newValidItem: DATA_TYPE,
-    invalidFirstItem: DATA_TYPE
+    invalidFirstItem: DATA_TYPE,
+    resetValue: any,
 }
 
-function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
-    array: FormArray<FORM_TYPE>,
-    supervisor: FormArrayGroupSupervisor<DATA_TYPE> | FormArrayControlSupervisor<DATA_TYPE>,
-    testData: FormArrayTestData<DATA_TYPE, FORM_TYPE>,
-    showLog = false
+function testFormArray<
+    DATA_TYPE,
+    FORM_TYPE extends FormArray<FORM_ARRAY_ITEM_TYPE>,
+    FORM_ARRAY_ITEM_TYPE extends FormControl | FormGroup
+>(
+    array: FORM_TYPE,
+    supervisor: FormArrayGroupSupervisor<DATA_TYPE, FORM_TYPE> | FormArrayControlSupervisor<DATA_TYPE>,
+    testData: FormArrayTestData<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>,
 ) {
     expect(supervisor.value).toEqual([testData.initialValidItem]);
     expect(supervisor.hasChange()).toBe(false);
@@ -168,6 +181,13 @@ function testFormArray<DATA_TYPE, FORM_TYPE extends FormControl | FormGroup>(
     ]);
     expect(array.at(0).valid).toBe(false);
     expect(array.valid).toBe(false);
+
+    supervisor.reset();
+
+    expect(array.value).toEqual([testData.resetValue]);
+    expect(array.at(0).valid).toBe(false);
+    expect(array.valid).toBe(false);
+
 
     supervisor.clear();
 

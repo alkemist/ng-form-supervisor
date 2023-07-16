@@ -65,13 +65,13 @@ export type FormGroupGeneric<DATA_TYPE> = {
 
 export type FormArrayControlItemInterfaceType = 'control';
 
-export type FormArrayGroupInterfaceType<DATA_TYPE> = {
-    [K in keyof DATA_TYPE]: FormArrayItemInterfaceType<DATA_TYPE[K]>
+export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
+    [K in keyof DATA_TYPE]: FormArrayItemInterfaceType<DATA_TYPE[K], FORM_ARRAY_ITEM_TYPE>
 };
 
-export type FormArrayItemInterfaceType<DATA_TYPE> = {
-    interface: DATA_TYPE extends ValueRecordForm
-        ? FormArrayGroupInterfaceType<DATA_TYPE>
+export type FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
+    interface: FORM_ARRAY_ITEM_TYPE extends FormGroup
+        ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
         : FormArrayControlItemInterfaceType,
     validator: () => {}
 };
@@ -88,14 +88,14 @@ export type SupervisorType<
     DATA_TYPE extends (infer DATA_TYPE_ITEM)[]
         ? FORM_TYPE extends FormArray
             ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup
-                ? FormArrayGroupSupervisor<DATA_TYPE_ITEM>
+                ? FormArrayGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE>
                 : FormArrayControlSupervisor<DATA_TYPE_ITEM>
             : FORM_TYPE extends FormGroup
                 ? FormGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE>
                 : FormControlSupervisor<DATA_TYPE_ITEM>
         : FORM_TYPE extends FormArray
             ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup
-                ? FormArrayGroupSupervisor<DATA_TYPE>
+                ? FormArrayGroupSupervisor<DATA_TYPE, FORM_TYPE>
                 : FormArrayControlSupervisor<DATA_TYPE>
             : FORM_TYPE extends FormGroup
                 ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE>
@@ -113,7 +113,7 @@ export type GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE> =
             ? T
             : never;
 
-export type GetFormArrayGenericClass<FORM_GROUP, > =
+export type GetFormArrayGenericClass<FORM_GROUP> =
     FORM_GROUP extends FormArray<infer T extends AbstractControl>
         ? T
         : never;

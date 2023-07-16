@@ -5,7 +5,7 @@ export interface BasicUser {
     name: string
 }
 
-export type USER_GROUP = "USER" | "ADMIN"
+export type USER_GROUP = "USER" | "ADMIN" | "SUPERADMIN"
 
 export interface UserProfile extends GenericValueRecord<string | null> {
     username: string,

@@ -23,6 +23,26 @@ describe("FormGroupSupervisor", () => {
             }
         }
 
+        const newValue: ComplexeUser = {
+            id: 1,
+            name: "admin",
+            groups: ['SUPERADMIN'],
+            profiles: [
+                {
+                    username: "username1-bis",
+                    avatar: null
+                },
+                {
+                    username: "username2",
+                    avatar: null
+                }
+            ],
+            rights: {
+                viewProfile: true,
+                viewUsers: true
+            }
+        }
+
         const group =
             new FormGroup({
                 id: new FormControl<number | null>(initialValue.id),
@@ -34,32 +54,12 @@ describe("FormGroupSupervisor", () => {
                     new FormControl<USER_GROUP>(initialValue.groups[0])
                 ], [Validators.required]),
 
-                profiles: new FormArray<
-                    FormGroup<{
-                        username: FormControl<string | null>,
-                        avatar: FormControl<string | null>,
-                    }>
-                >([
-                    new FormGroup<{
-                        username: FormControl<string | null>,
-                        avatar: FormControl<string | null>,
-                    }>({
-                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
-                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
-                    })
-                ], [Validators.required]),
-                /*profiles: new FormArray([
+                profiles: new FormArray([
                     new FormGroup({
                         username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
                         avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
                     })
-                ], [Validators.required]),*/
-                /*profiles: new FormArray([
-                    new FormGroup<FormGroupInterface<UserProfile>>({
-                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
-                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
-                    })
-                ], [Validators.required]),*/
+                ], [Validators.required]),
 
                 rights: new FormGroup({
                     viewProfile: new FormControl<boolean | null>(initialValue.rights.viewProfile),
@@ -161,42 +161,15 @@ describe("FormGroupSupervisor", () => {
         expect(group.get("profiles")?.value).toEqual(initialValue.profiles);
         expect(group.get("rights")?.value).toEqual(initialValue.rights);
 
-        supervisor.get("name").setValue("us");
+        supervisor.get("name").setValue(newValue.name);
         supervisor.get('groups').remove(0);
         supervisor.get('groups').add("ADMIN");
-        supervisor.get("profiles").add({
-            username: "username2",
-            avatar: null
-        });
+        supervisor.get('groups').at(0).setValue(newValue.groups[0]);
+        supervisor.get('profiles').at(0).get("username").setValue(newValue.profiles[0].username);
+        supervisor.get("profiles").add(newValue.profiles[1]);
+        supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
 
-        const supervisors = supervisor.supervisors;
-
-        const nameSupervisor = supervisor.get('name');
-
-        const groupsSupervisor = supervisor.get('groups');
-        const groupSupervisor = groupsSupervisor.at(0);
-        groupSupervisor.setValue("ADMIN");
-
-        const profilesSupervisor = supervisor.get('profiles');
-        const profileSupervisor = profilesSupervisor.at(0);
-        const usernameSupervisor = profileSupervisor.get("username");
-        //usernameSupervisor.setValue("username2");
-
-        const rightsSupervisor = supervisor.get("rights");
-        const viewUsersSupervisor = rightsSupervisor.get("viewUsers")
-        viewUsersSupervisor.setValue(true);
-
-        //supervisor.get("rights").get("viewUsers").setValue(true)
-
-        /*group.setValue({id: 1, name: "user 1"})
-
-        expect(supervisor.value).toEqual({id: 1, name: "user 1"});
-        expect(supervisor.hasChange()).toBe(true);
-        expect(supervisor.valid).toBe(true);
-        expect(supervisor.get("id").value).toBe(1);
-        expect(supervisor.get("id").hasChange()).toBe(true);
-        expect(supervisor.get("name").value).toBe("user 1");
-        expect(supervisor.get("name").hasChange()).toBe(true);
+        expect(group.value).toEqual(newValue);
 
         supervisor.updateInitialValue();
 
@@ -205,13 +178,42 @@ describe("FormGroupSupervisor", () => {
         supervisor.reset();
 
         expect(supervisor.hasChange()).toBe(true);
-        expect(group.value).toEqual({id: null, name: null});
+        expect(group.value).toEqual({
+            id: null,
+            name: null,
+            groups: [null],
+            profiles: [{
+                username: null,
+                avatar: null,
+            }, {
+                username: null,
+                avatar: null,
+            }],
+            rights: {
+                viewProfile: null,
+                viewUsers: null,
+            }
+        });
         expect(group.valid).toBe(false);
+
+        // @TODO Wait dev clear function
+        /*supervisor.clear();
+
+        expect(group.value).toEqual({
+            id: null,
+            name: null,
+            groups: [],
+            profiles: [],
+            rights: {
+                viewProfile: null,
+                viewUsers: null,
+            }
+        });*/
 
         supervisor.restore();
 
-        expect(supervisor.hasChange()).toBe(false);
-        expect(group.value).toEqual({id: 1, name: "user 1"});
+        /*expect(supervisor.hasChange()).toBe(false);
+        expect(group.value).toEqual(newValue);
         expect(group.valid).toBe(true);*/
     })
 });

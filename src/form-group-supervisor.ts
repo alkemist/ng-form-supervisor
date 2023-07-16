@@ -6,6 +6,7 @@ import {SupervisorHelper} from "./supervisor.helper.js";
 import {
     ControlValueType,
     FormGroupGeneric,
+    FormGroupInterface,
     GetFormGroupGenericClass,
     GroupRawValueType,
     GroupValueType,
@@ -15,7 +16,7 @@ import {FormOptions} from "./form.interface.js";
 
 type SupervisorRecord<
     DATA_TYPE,
-    FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>>,
+    FORM_GROUP_TYPE extends FormGroup<FormGroupInterface<DATA_TYPE>>,
 > = {
     [K in keyof DATA_TYPE]: SupervisorType<
         DATA_TYPE[K],
@@ -97,6 +98,11 @@ export class FormGroupSupervisor<
 
     reset(options?: FormOptions) {
         this.group.reset();
+        // @TODO For array => clear
+    }
+
+    clear(options?: FormOptions) {
+        // @TODO For array => clear ELSE reset
     }
 
     updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
@@ -115,8 +121,6 @@ export class FormGroupSupervisor<
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).restore();
         })
-
-        super.restore();
     }
 
     get<
