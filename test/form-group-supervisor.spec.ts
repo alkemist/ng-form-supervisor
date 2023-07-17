@@ -1,9 +1,7 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ComplexeUser, USER_GROUP} from "./test-data";
-import {FormGroupSupervisor} from "../src/form-group-supervisor";
-import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
-import {FormControlSupervisor} from "../src/form-control-supervisor";
+import {FormArrayControlSupervisor, FormArrayGroupSupervisor, FormControlSupervisor, FormGroupSupervisor} from "../src";
 
 describe("FormGroupSupervisor", () => {
     it("ComplexeUser", () => {
@@ -139,7 +137,7 @@ describe("FormGroupSupervisor", () => {
             username: new FormControl<string>("", [Validators.required]),
             avatar: new FormControl<string | null>(invalidValue.profiles[1].avatar),
             badges: new FormArray([]),
-        }), {emitEvent: true});
+        }));
 
         supervisor.patchValue({
             name: invalidValue.name,
@@ -205,11 +203,11 @@ describe("FormGroupSupervisor", () => {
 
         supervisor.get("name").setValue(newValue.name);
         supervisor.get('groups').remove(0);
-        supervisor.get('groups').add("ADMIN");
+        supervisor.get('groups').push("ADMIN");
         supervisor.get('groups').at(0).setValue(newValue.groups[0]);
         supervisor.get('profiles').at(0).get("username").setValue(newValue.profiles[0].username);
-        supervisor.get("profiles").add(newValue.profiles[1]);
-        supervisor.get("profiles").at(1).get("badges").add(newValueBis.profiles[1].badges[0])
+        supervisor.get("profiles").push(newValue.profiles[1]);
+        supervisor.get("profiles").at(1).get("badges").push(newValueBis.profiles[1].badges[0])
         supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
 
         expect(supervisor.hasChange()).toBe(true);

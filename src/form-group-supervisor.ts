@@ -6,7 +6,7 @@ import {SupervisorHelper} from "./supervisor.helper.js";
 import {
     ArrayType,
     ControlValueType,
-    FormArrayItemInterfaceType,
+    FormArrayItemConfigurationType,
     FormGroupInterface,
     GetFormGroupGenericClass,
     GroupRawValueType,
@@ -42,7 +42,7 @@ export class FormGroupSupervisor<
         protected group: FORM_GROUP_TYPE,
         data: DATA_TYPE = group.value as DATA_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        protected itemType?: FormArrayItemInterfaceType<DATA_TYPE, FORM_GROUP_TYPE>,
+        protected configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE>,
     ) {
         super(determineArrayIndexFn);
 
@@ -64,7 +64,7 @@ export class FormGroupSupervisor<
                 >(
                     control,
                     determineArrayIndexFn,
-                    this.itemType?.interface[property]
+                    this.configuration?.interface[property]
                 );
 
                 return supervisors;
@@ -147,21 +147,13 @@ export class FormGroupSupervisor<
         super.restore();
     }
 
-    get<
-        K extends keyof DATA_TYPE
-    >
-    (
-        property: K,
-    ): SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]> {
+    get<K extends keyof DATA_TYPE>(property: K)
+        : SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]> {
         return this.supervisors[property] as SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>;
     }
 
-    getFormProperty<
-        K extends keyof DATA_TYPE,
-    >
-    (
-        property: K,
-    ): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K] {
+    getFormProperty<K extends keyof DATA_TYPE>(property: K)
+        : GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K] {
         return (this.supervisors[property] as FormSupervisor).form as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K];
     }
 

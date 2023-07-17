@@ -1,25 +1,19 @@
-import {GenericValueRecord} from "@alkemist/compare-engine";
-
 export interface BasicUser {
     id: number | null,
     name: string
 }
 
-export type USER_GROUP = "USER" | "ADMIN" | "SUPERADMIN"
-
-export interface UserProfile extends GenericValueRecord<string | null | string[]> {
-    username: string,
-    avatar: string | null,
-    badges: string[],
-}
-
-export interface UserRights extends GenericValueRecord<boolean> {
-    viewProfile: boolean,
-    viewUsers: boolean
-}
+export type USER_GROUP = "USER" | "ADMIN" | "SUPERADMIN";
 
 export interface ComplexeUser extends BasicUser {
     groups: USER_GROUP[],
-    profiles: UserProfile[]
-    rights: UserRights
+    profiles: {
+        username: string,
+        avatar: string | null,
+        badges: string[],
+    }[]
+    rights: {
+        viewProfile: boolean,
+        viewUsers: boolean
+    }
 }

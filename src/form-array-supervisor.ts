@@ -3,12 +3,12 @@ import {Observable} from "rxjs";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
-import {ControlValueType, FormArrayItemInterfaceType, GetFormArrayGenericClass} from "./form.type.js";
+import {ControlValueType, FormArrayItemConfigurationType, GetFormArrayGenericClass} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
 
-export class FormArraySupervisor<
+export abstract class FormArraySupervisor<
     DATA_TYPE,
     FORM_TYPE extends FormArray,
     SUPERVISOR_TYPE extends FormSupervisor<DATA_TYPE> =
@@ -19,14 +19,14 @@ export class FormArraySupervisor<
     DATA_TYPE[],
     FORM_TYPE
 > {
-    protected itemType: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>;
+    protected itemType: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>;
     protected supervisors: SUPERVISOR_TYPE[] = [];
     protected _items: FORM_TYPE;
 
-    constructor(
+    protected constructor(
         items: FORM_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
     ) {
         super(determineArrayIndexFn);
 
@@ -64,7 +64,7 @@ export class FormArraySupervisor<
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
         this._items.clear(options);
-        itemsValue?.forEach(itemValue => this.add(itemValue));
+        itemsValue?.forEach(itemValue => this.push(itemValue));
     }
 
     patchValue(value: DATA_TYPE[], options?: FormOptions) {
@@ -89,7 +89,7 @@ export class FormArraySupervisor<
         return supervisor;
     }
 
-    add(itemValue: DATA_TYPE, options?: FormOptions) {
+    push(itemValue: DATA_TYPE, options?: FormOptions) {
         const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
             this.itemType,
             itemValue
@@ -133,13 +133,13 @@ export class FormArraySupervisor<
 
     enableLog() {
         super.enableLog();
-        this.supervisors.forEach((supervisor, index) =>
+        this.supervisors.forEach((supervisor) =>
             supervisor.enableLog());
     }
 
     disableLog() {
         super.disableLog();
-        this.supervisors.forEach((supervisor, index) =>
+        this.supervisors.forEach((supervisor) =>
             supervisor.disableLog());
     }
 
@@ -153,7 +153,7 @@ export class FormArraySupervisor<
                 itemsValue.forEach((itemValue, index) => {
 
                     if (this._items.controls[index] === undefined) {
-                        this.add(itemValue);
+                        this.push(itemValue);
                     }
 
                     const control =
@@ -191,7 +191,7 @@ export class FormArrayControlSupervisor<
     constructor(
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
     ) {
         super(items, determineArrayIndexFn, itemType);
     }
@@ -208,7 +208,7 @@ export class FormArrayGroupSupervisor<
         items: FORM_TYPE,
         values: DATA_TYPE[],
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
     ) {
         super(items, determineArrayIndexFn, itemType);
     }

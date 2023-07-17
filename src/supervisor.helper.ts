@@ -7,7 +7,7 @@ import {
     ArrayType,
     ControlValueType,
     FormArrayGroupInterfaceType,
-    FormArrayItemInterfaceType,
+    FormArrayItemConfigurationType,
     FormArrayItemType,
     FormGroupInterface,
     GetFormArrayGenericClass,
@@ -25,7 +25,7 @@ export abstract class SupervisorHelper {
     >(
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
-        itemType?: FormArrayItemInterfaceType<DATA_TYPE, FORM_TYPE>,
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>,
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
@@ -36,13 +36,13 @@ export abstract class SupervisorHelper {
                     control,
                     control.value,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormGroup>
+                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
                 );
             } else {
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
                     control,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormControl>
+                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>
                 );
             }
         } else if (control instanceof FormGroup) {
@@ -50,7 +50,7 @@ export abstract class SupervisorHelper {
                 control,
                 control.value,
                 determineArrayIndexFn,
-                itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormGroup>
+                itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
             );
         } else {
             supervisor = new FormControlSupervisor<DataType>(
@@ -65,7 +65,7 @@ export abstract class SupervisorHelper {
     static extractFormGroupInterface<
         DATA_TYPE,
         FORM_TYPE extends FormControl | FormGroup,
-    >(array: FormArray<FORM_TYPE>): FormArrayItemInterfaceType<DATA_TYPE, FORM_TYPE> {
+    >(array: FormArray<FORM_TYPE>): FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE> {
         const controls: FORM_TYPE[] = array.controls as FORM_TYPE[];
         if (controls.length === 0) {
             console.error("Impossible to determine children type");
@@ -94,7 +94,7 @@ export abstract class SupervisorHelper {
     static extractFormGroupItemInterface<
         DATA_TYPE,
         FORM_TYPE extends AbstractControl
-    >(control: FORM_TYPE): FormArrayItemInterfaceType<DATA_TYPE, FORM_TYPE> {
+    >(control: FORM_TYPE): FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE> {
         type DataType = ControlValueType<typeof control>;
         const itemInterface = control instanceof FormGroup
             ? SupervisorHelper.extractFormGroupItemsInterface<DataType>(control as FormGroup)
@@ -104,14 +104,14 @@ export abstract class SupervisorHelper {
         return {
             interface: itemInterface,
             validator: control.validator
-        } as FormArrayItemInterfaceType<DATA_TYPE, FORM_TYPE>
+        } as FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>
     }
 
     static factoryItem<
         DATA_TYPE,
         FORM_ARRAY_ITEM_TYPE extends FormGroup | FormControl | FormArray,
     >(
-        itemInterface: FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>,
+        itemInterface: FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>,
         itemValue: DATA_TYPE
     ): FORM_ARRAY_ITEM_TYPE {
         if (
@@ -133,7 +133,7 @@ export abstract class SupervisorHelper {
             return new FormArray(
                 itemValue.map(subItemValue =>
                     SupervisorHelper.factoryItem(
-                        itemInterface.interface as FormArrayItemInterfaceType<dataSubItemType, controlSubItemType>,
+                        itemInterface.interface as FormArrayItemConfigurationType<dataSubItemType, controlSubItemType>,
                         subItemValue as dataSubItemType
                     )
                 ),
@@ -162,7 +162,7 @@ export abstract class SupervisorHelper {
 
                 formGroupInterface[property] =
                     SupervisorHelper.factoryItem(
-                        itemInterface[property] as FormArrayItemInterfaceType<subItemType, FormArrayItemType<subItemType>>,
+                        itemInterface[property] as FormArrayItemConfigurationType<subItemType, FormArrayItemType<subItemType>>,
                         itemValue[property]
                     )
                 return formGroupInterface;

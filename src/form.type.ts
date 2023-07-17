@@ -26,7 +26,7 @@ export declare type ControlRawValueType<T extends AbstractControl>
 export type GroupRawValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
     = { [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>; }
 
-type RecursivePartial<T> = {
+export type RecursivePartial<T> = {
     [P in keyof T]?:
     T[P] extends (infer U)[] ? RecursivePartial<U>[] :
         T[P] extends object | undefined ? RecursivePartial<T[P]> :
@@ -71,14 +71,14 @@ export type FormGroupInterface<DATA_TYPE> = {
 export type FormArrayControlItemInterfaceType = 'control';
 
 export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
-    [K in keyof DATA_TYPE]: FormArrayItemInterfaceType<DATA_TYPE[K], FORM_ARRAY_ITEM_TYPE>
+    [K in keyof DATA_TYPE]: FormArrayItemConfigurationType<DATA_TYPE[K], FORM_ARRAY_ITEM_TYPE>
 };
 
-export type FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
+export type FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
     interface: FORM_ARRAY_ITEM_TYPE extends FormGroup
         ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
         : FORM_ARRAY_ITEM_TYPE extends FormArray
-            ? FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
+            ? FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
             : FormArrayControlItemInterfaceType,
     validator: () => {}
 };

@@ -1,9 +1,7 @@
 import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {BasicUser} from "./test-data";
-import {FormGroupSupervisor} from "../src/form-group-supervisor";
-import {FormControlSupervisor} from "../src/form-control-supervisor";
-import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
+import {FormArrayControlSupervisor, FormArrayGroupSupervisor, FormControlSupervisor, FormGroupSupervisor} from "../src";
 
 describe("FormArraySupervisor", () => {
     it("Users group array", () => {
@@ -138,7 +136,7 @@ function testFormArray<
     expect(supervisor.at(1).hasChange()).toBe(false);
     expect(supervisor.valid).toBe(false);
 
-    supervisor.add(testData.invalidItem);
+    supervisor.push(testData.invalidItem);
 
     expect(array.length).toBe(3);
     expect(array.value).toEqual([
@@ -234,7 +232,7 @@ function testFormArray<
     expect(supervisor.hasChange()).toBe(false);
 
     supervisor.at(0).setValue(testData.invalidFirstItem as never);
-    supervisor.add(testData.invalidItem);
+    supervisor.push(testData.invalidItem);
 
     expect(supervisor.hasChange()).toBe(true);
     expect(supervisor.at(0).hasChange()).toBe(true);
