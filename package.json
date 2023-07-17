@@ -1,6 +1,6 @@
 {
   "name": "@alkemist/ng-form-supervisor",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Angular Form Supervisor",
   "main": "lib/index.min.mjs",
   "type": "module",
