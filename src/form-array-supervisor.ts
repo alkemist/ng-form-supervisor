@@ -27,9 +27,8 @@ export class FormArraySupervisor<
         items: FORM_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
-        showLog = false,
     ) {
-        super(determineArrayIndexFn, showLog);
+        super(determineArrayIndexFn);
 
         this._items = items;
         this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(this._items);
@@ -92,12 +91,20 @@ export class FormArraySupervisor<
 
     add(itemValue: DATA_TYPE, options?: FormOptions) {
         const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
-            this.itemType as FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+            this.itemType,
             itemValue
         );
 
         this._items.push(item, options);
-        return item;
+    }
+
+    insert(itemValue: DATA_TYPE, index: number, options?: FormOptions) {
+        const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
+            this.itemType,
+            itemValue
+        );
+
+        this._items.insert(item, index, options);
     }
 
     remove(index: number) {
@@ -124,13 +131,27 @@ export class FormArraySupervisor<
         super.restore(options);
     }
 
+    enableLog() {
+        super.enableLog();
+        this.supervisors.forEach((supervisor, index) =>
+            supervisor.enableLog());
+    }
+
+    disableLog() {
+        super.disableLog();
+        this.supervisors.forEach((supervisor, index) =>
+            supervisor.disableLog());
+    }
+
     protected onChange(itemsValue: DATA_TYPE[] | undefined) {
         super.onChange(itemsValue);
         this.supervisors = [];
 
         if (itemsValue) {
             if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
+
                 itemsValue.forEach((itemValue, index) => {
+
                     if (this._items.controls[index] === undefined) {
                         this.add(itemValue);
                     }
@@ -139,10 +160,12 @@ export class FormArraySupervisor<
                         this._items.controls[index] as GetFormArrayGenericClass<FORM_TYPE>;
 
                     const supervisor =
-                        SupervisorHelper.factory<DATA_TYPE[], GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
+                        SupervisorHelper.factory<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
                             control,
-                            this.determineArrayIndexFn
+                            this.determineArrayIndexFn,
+                            this.itemType
                         )
+
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
                         && CompareHelper.isArray(this.compareEngine.leftValue)) {
@@ -169,9 +192,8 @@ export class FormArrayControlSupervisor<
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemInterfaceType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
-        showLog = false,
     ) {
-        super(items, determineArrayIndexFn, itemType, showLog);
+        super(items, determineArrayIndexFn, itemType);
     }
 }
 
@@ -187,8 +209,7 @@ export class FormArrayGroupSupervisor<
         values: DATA_TYPE[],
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemInterfaceType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
-        showLog = false,
     ) {
-        super(items, determineArrayIndexFn, itemType, showLog);
+        super(items, determineArrayIndexFn, itemType);
     }
 }

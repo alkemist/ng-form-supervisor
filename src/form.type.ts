@@ -68,10 +68,6 @@ export type FormGroupInterface<DATA_TYPE> = {
         : FormArrayItemType<DATA_TYPE[K]> | FormArray<FormControl<ArrayType<DATA_TYPE[K]> | null>>
 };
 
-export type FormGroupGeneric<DATA_TYPE> = {
-    [K in keyof DATA_TYPE]: any
-};
-
 export type FormArrayControlItemInterfaceType = 'control';
 
 export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
@@ -81,7 +77,9 @@ export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
 export type FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
     interface: FORM_ARRAY_ITEM_TYPE extends FormGroup
         ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
-        : FormArrayControlItemInterfaceType,
+        : FORM_ARRAY_ITEM_TYPE extends FormArray
+            ? FormArrayItemInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
+            : FormArrayControlItemInterfaceType,
     validator: () => {}
 };
 

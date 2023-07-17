@@ -4,8 +4,9 @@ import {ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
 import {
+    ArrayType,
     ControlValueType,
-    FormGroupGeneric,
+    FormArrayItemInterfaceType,
     FormGroupInterface,
     GetFormGroupGenericClass,
     GroupRawValueType,
@@ -28,7 +29,7 @@ type SupervisorRecord<
 
 export class FormGroupSupervisor<
     DATA_TYPE,
-    FORM_GROUP_TYPE extends FormGroup<FormGroupGeneric<DATA_TYPE>>,
+    FORM_GROUP_TYPE extends FormGroup,
 >
     extends FormSupervisor<
         DATA_TYPE,
@@ -40,7 +41,8 @@ export class FormGroupSupervisor<
     constructor(
         protected group: FORM_GROUP_TYPE,
         data: DATA_TYPE = group.value as DATA_TYPE,
-        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined
+        determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
+        protected itemType?: FormArrayItemInterfaceType<DATA_TYPE, FORM_GROUP_TYPE>,
     ) {
         super(determineArrayIndexFn);
 
@@ -50,7 +52,7 @@ export class FormGroupSupervisor<
             .reduce((supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>, property: keyof DATA_TYPE) => {
                 const control = this.controls[property] as FormGroup | FormArray | FormControl;
                 type DataType = ControlValueType<typeof control>;
-                type SubDataType = DataType extends (infer U)[] ? U : DataType;
+                type SubDataType = ArrayType<DataType>;
 
                 supervisors[property] = SupervisorHelper.factory<
                     SubDataType,
@@ -62,6 +64,7 @@ export class FormGroupSupervisor<
                 >(
                     control,
                     determineArrayIndexFn,
+                    this.itemType?.interface[property]
                 );
 
                 return supervisors;
@@ -160,5 +163,21 @@ export class FormGroupSupervisor<
         property: K,
     ): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K] {
         return (this.supervisors[property] as FormSupervisor).form as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K];
+    }
+
+    enableLog() {
+        super.enableLog();
+        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).enableLog();
+        });
+    }
+
+    disableLog() {
+        super.disableLog();
+        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).disableLog();
+        });
     }
 }

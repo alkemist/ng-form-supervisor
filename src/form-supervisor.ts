@@ -8,13 +8,13 @@ export abstract class FormSupervisor<
     DATA_TYPE = any,
     FORM_TYPE extends AbstractControl = AbstractControl
 > {
-    public compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
+    protected showLog = false;
+    protected compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
     protected sub: Subscription = new Subscription();
     private destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
 
     protected constructor(
         protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey),
-        public showLog = false
     ) {
         this.compareEngine = new CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>(determineArrayIndexFn)
 
@@ -52,6 +52,14 @@ export abstract class FormSupervisor<
 
     restore(options?: FormOptions) {
         this.setValue(this.compareEngine.leftValue, options);
+    }
+
+    enableLog() {
+        this.showLog = true;
+    }
+
+    disableLog() {
+        this.showLog = false;
     }
 
     protected onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | undefined) {

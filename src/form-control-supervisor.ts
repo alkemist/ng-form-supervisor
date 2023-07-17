@@ -12,9 +12,8 @@ export class FormControlSupervisor<DATA_TYPE>
     constructor(
         protected control: FormControl<DATA_TYPE>,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey),
-        showLog = false
     ) {
-        super(determineArrayIndexFn, showLog);
+        super(determineArrayIndexFn);
 
         this.updateInitialValue();
         this.sub.add(this.control.valueChanges.subscribe((value) => {

@@ -2,8 +2,8 @@ import {describe, expect, it} from "@jest/globals";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ComplexeUser, USER_GROUP} from "./test-data";
 import {FormGroupSupervisor} from "../src/form-group-supervisor";
-import {FormControlSupervisor} from "../src/form-control-supervisor";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
+import {FormControlSupervisor} from "../src/form-control-supervisor";
 
 describe("FormGroupSupervisor", () => {
     it("ComplexeUser", () => {
@@ -14,7 +14,8 @@ describe("FormGroupSupervisor", () => {
             profiles: [
                 {
                     username: "username1",
-                    avatar: null
+                    avatar: null,
+                    badges: ['first'],
                 }
             ],
             rights: {
@@ -31,7 +32,8 @@ describe("FormGroupSupervisor", () => {
                 initialValue.profiles[0],
                 {
                     username: "",
-                    avatar: ""
+                    avatar: "",
+                    badges: [],
                 }
             ],
             rights: {
@@ -47,17 +49,30 @@ describe("FormGroupSupervisor", () => {
             profiles: [
                 {
                     username: "username1-bis",
-                    avatar: null
+                    avatar: null,
+                    badges: ["first"],
                 },
                 {
                     username: "username2",
-                    avatar: null
+                    avatar: null,
+                    badges: [],
                 }
             ],
             rights: {
                 viewProfile: true,
                 viewUsers: true
             }
+        }
+
+        const newValueBis: ComplexeUser = {
+            ...newValue,
+            profiles: [
+                newValue.profiles[0],
+                {
+                    ...newValue.profiles[1],
+                    badges: ["new"],
+                }
+            ],
         }
 
         const group =
@@ -75,6 +90,9 @@ describe("FormGroupSupervisor", () => {
                     new FormGroup({
                         username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
                         avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
+                        badges: new FormArray([
+                            new FormControl<string | null>(initialValue.profiles[0].badges[0])
+                        ]),
                     })
                 ], [Validators.required]),
 
@@ -95,6 +113,8 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.get("profiles")).toBeInstanceOf(FormArrayGroupSupervisor);
         expect(supervisor.get("profiles").at(0)).toBeInstanceOf(FormGroupSupervisor);
         expect(supervisor.get("profiles").at(0).get('username')).toBeInstanceOf(FormControlSupervisor);
+        expect(supervisor.get("profiles").at(0).get('badges')).toBeInstanceOf(FormArrayControlSupervisor);
+        expect(supervisor.get("profiles").at(0).get('badges').at(0)).toBeInstanceOf(FormControlSupervisor);
         expect(supervisor.get("rights")).toBeInstanceOf(FormGroupSupervisor);
         expect(supervisor.get("rights").get("viewProfile")).toBeInstanceOf(FormControlSupervisor);
 
@@ -104,6 +124,8 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.getFormProperty("profiles")).toBeInstanceOf(FormArray);
         expect(supervisor.getFormProperty("profiles").at(0)).toBeInstanceOf(FormGroup);
         expect(supervisor.getFormProperty("profiles").at(0).get('username')).toBeInstanceOf(FormControl);
+        expect(supervisor.getFormProperty("profiles").at(0).get('badges')).toBeInstanceOf(FormArray);
+        expect((supervisor.getFormProperty("profiles").at(0).get('badges') as FormArray).at(0)).toBeInstanceOf(FormControl);
         expect(supervisor.getFormProperty("rights")).toBeInstanceOf(FormGroup);
         expect(supervisor.getFormProperty("rights").get('viewProfile')).toBeInstanceOf(FormControl);
 
@@ -113,11 +135,12 @@ describe("FormGroupSupervisor", () => {
         (group.get("groups") as FormArray)?.removeAt(0);
         group.get("rights")?.get("viewProfile")?.setValue(invalidValue.rights.viewProfile);
 
-        (group.get("profiles") as FormArray)?.push(new FormGroup({
+        (group.get("profiles") as FormArray).push(new FormGroup({
             username: new FormControl<string>("", [Validators.required]),
             avatar: new FormControl<string | null>(invalidValue.profiles[1].avatar),
-        }));
-        
+            badges: new FormArray([]),
+        }), {emitEvent: true});
+
         supervisor.patchValue({
             name: invalidValue.name,
             profiles: [
@@ -126,7 +149,7 @@ describe("FormGroupSupervisor", () => {
                     username: invalidValue.profiles[1].username
                 }
             ]
-        })
+        });
 
         expect(supervisor.value).toEqual({
             ...initialValue,
@@ -186,6 +209,7 @@ describe("FormGroupSupervisor", () => {
         supervisor.get('groups').at(0).setValue(newValue.groups[0]);
         supervisor.get('profiles').at(0).get("username").setValue(newValue.profiles[0].username);
         supervisor.get("profiles").add(newValue.profiles[1]);
+        supervisor.get("profiles").at(1).get("badges").add(newValueBis.profiles[1].badges[0])
         supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
 
         expect(supervisor.hasChange()).toBe(true);
@@ -200,7 +224,7 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.get("rights").hasChange()).toBe(true);
         expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
         expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(true);
-        expect(group.value).toEqual(newValue);
+        expect(group.value).toEqual(newValueBis);
 
         supervisor.updateInitialValue();
 
@@ -241,9 +265,15 @@ describe("FormGroupSupervisor", () => {
             profiles: [{
                 username: null,
                 avatar: null,
+                badges: [
+                    null
+                ]
             }, {
                 username: null,
                 avatar: null,
+                badges: [
+                    null
+                ]
             }],
             rights: {
                 viewProfile: null,
@@ -282,7 +312,7 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.get("rights").hasChange()).toBe(false);
         expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
         expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
-        expect(group.value).toEqual(newValue);
+        expect(group.value).toEqual(newValueBis);
         expect(group.valid).toBe(true);
     })
 });
