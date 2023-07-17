@@ -43,6 +43,6 @@ export class FormControlSupervisor<DATA_TYPE>
     }
 
     reset(options?: FormOptions) {
-        this.control.reset();
+        this.control.reset(undefined, options);
     }
 }

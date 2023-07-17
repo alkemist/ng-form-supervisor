@@ -6,7 +6,7 @@ import {FormControlSupervisor} from "../src/form-control-supervisor";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "../src/form-array-supervisor";
 
 describe("FormGroupSupervisor", () => {
-    it("Basic", () => {
+    it("ComplexeUser", () => {
         const initialValue: ComplexeUser = {
             id: 1,
             name: "user 1",
@@ -99,7 +99,7 @@ describe("FormGroupSupervisor", () => {
             username: new FormControl<string>("", [Validators.required]),
             avatar: new FormControl<string | null>(null),
         }));
-        group.get("rights")?.get("viewUsers")?.setValue(true)
+        group.get("rights")?.get("viewProfile")?.setValue(false)
 
         expect(supervisor.value).toEqual({
             ...initialValue,
@@ -116,8 +116,8 @@ describe("FormGroupSupervisor", () => {
                 }
             ],
             rights: {
-                viewProfile: true,
-                viewUsers: true
+                viewProfile: false,
+                viewUsers: false
             }
         });
         expect(supervisor.hasChange()).toBe(true);
@@ -142,17 +142,36 @@ describe("FormGroupSupervisor", () => {
             }
         ]);
         expect(supervisor.get("profiles").hasChange()).toEqual(true);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).get('avatar').hasChange()).toBe(false);
         expect(supervisor.get("profiles").valid).toBe(false);
         expect(supervisor.get("rights").value).toEqual({
-            viewProfile: true,
-            viewUsers: true
+            viewProfile: false,
+            viewUsers: false
         });
         expect(supervisor.get("rights").hasChange()).toEqual(true);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(true);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
         expect(supervisor.get("rights").valid).toBe(true);
 
         supervisor.restore();
 
         expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.get("id").hasChange()).toBe(false);
+        expect(supervisor.get("name").hasChange()).toBe(false);
+        expect(supervisor.get('groups').hasChange()).toBe(false);
+        expect(supervisor.get('groups').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get("rights").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
         expect(group.value).toEqual(initialValue);
         expect(group.valid).toBe(true);
         expect(group.get("id")?.value).toBe(initialValue.id);
@@ -169,15 +188,52 @@ describe("FormGroupSupervisor", () => {
         supervisor.get("profiles").add(newValue.profiles[1]);
         supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
 
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.get("id").hasChange()).toBe(false);
+        expect(supervisor.get("name").hasChange()).toBe(true);
+        expect(supervisor.get('groups').hasChange()).toBe(true);
+        expect(supervisor.get('groups').at(0).hasChange()).toBe(true);
+        expect(supervisor.get('profiles').hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get("rights").hasChange()).toBe(true);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(true);
         expect(group.value).toEqual(newValue);
 
         supervisor.updateInitialValue();
 
         expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.get("id").hasChange()).toBe(false);
+        expect(supervisor.get("name").hasChange()).toBe(false);
+        expect(supervisor.get('groups').hasChange()).toBe(false);
+        expect(supervisor.get('groups').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get("rights").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
 
         supervisor.reset();
 
         expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.get("id").hasChange()).toBe(true);
+        expect(supervisor.get("name").hasChange()).toBe(true);
+        expect(supervisor.get('groups').hasChange()).toBe(true);
+        expect(supervisor.get('groups').at(0).hasChange()).toBe(true);
+        expect(supervisor.get('profiles').hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(1).get('username').hasChange()).toBe(true);
+        expect(supervisor.get('profiles').at(1).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get("rights").hasChange()).toBe(true);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(true);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(true);
         expect(group.value).toEqual({
             id: null,
             name: null,
@@ -196,8 +252,7 @@ describe("FormGroupSupervisor", () => {
         });
         expect(group.valid).toBe(false);
 
-        // @TODO Wait dev clear function
-        /*supervisor.clear();
+        supervisor.clear();
 
         expect(group.value).toEqual({
             id: null,
@@ -208,12 +263,26 @@ describe("FormGroupSupervisor", () => {
                 viewProfile: null,
                 viewUsers: null,
             }
-        });*/
+        });
 
         supervisor.restore();
 
-        /*expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.get("id").hasChange()).toBe(false);
+        expect(supervisor.get("name").hasChange()).toBe(false);
+        expect(supervisor.get('groups').hasChange()).toBe(false);
+        expect(supervisor.get('groups').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).get('username').hasChange()).toBe(false);
+        expect(supervisor.get('profiles').at(1).get('avatar').hasChange()).toBe(false);
+        expect(supervisor.get("rights").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(false);
+        expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
         expect(group.value).toEqual(newValue);
-        expect(group.valid).toBe(true);*/
+        expect(group.valid).toBe(true);
     })
 });

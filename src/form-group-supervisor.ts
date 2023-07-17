@@ -13,6 +13,7 @@ import {
     SupervisorType
 } from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
+import {FormArraySupervisor} from "./form-array-supervisor.js";
 
 type SupervisorRecord<
     DATA_TYPE,
@@ -44,8 +45,6 @@ export class FormGroupSupervisor<
 
         const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
 
-        this.updateInitialValue();
-
         this.supervisors = properties
             .reduce((supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>, property: keyof DATA_TYPE) => {
                 const control = this.controls[property] as FormGroup | FormArray | FormControl;
@@ -67,13 +66,15 @@ export class FormGroupSupervisor<
                 return supervisors;
             }, {} as SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>);
 
+        this.updateInitialValue();
+
         this.sub.add(this.valueChanges.subscribe((value) => {
             super.onChange(value)
         }));
     }
 
     get form(): FORM_GROUP_TYPE {
-        return this.group as FORM_GROUP_TYPE;
+        return this.group;
     }
 
     get valid(): boolean {
@@ -97,21 +98,31 @@ export class FormGroupSupervisor<
     }
 
     reset(options?: FormOptions) {
-        this.group.reset();
-        // @TODO For array => clear
+        this.group.reset(undefined, options);
     }
 
     clear(options?: FormOptions) {
-        // @TODO For array => clear ELSE reset
+        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        properties.forEach((property) => {
+            const supervisor = this.get(property);
+
+            if (supervisor instanceof FormArraySupervisor || supervisor instanceof FormGroupSupervisor) {
+                supervisor.clear()
+            } else {
+                (supervisor as FormSupervisor).reset();
+            }
+        })
     }
 
     updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
-        if (value) {
-            const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
-            properties.forEach((property) => {
-                (this.get(property) as FormSupervisor).updateInitialValue(value[property] as GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>);
-            })
-        }
+        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).updateInitialValue(
+                value !== undefined ? value[property] : undefined
+            );
+        })
 
         super.updateInitialValue(value);
     }
@@ -120,7 +131,9 @@ export class FormGroupSupervisor<
         const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).restore();
-        })
+        });
+
+        super.restore();
     }
 
     get<

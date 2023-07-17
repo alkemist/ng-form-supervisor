@@ -187,8 +187,7 @@ function testFormArray<
     expect(array.value).toEqual([testData.resetValue]);
     expect(array.at(0).valid).toBe(false);
     expect(array.valid).toBe(false);
-
-
+    
     supervisor.clear();
 
     expect(array.value).toEqual([]);

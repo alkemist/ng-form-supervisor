@@ -69,7 +69,7 @@ export class FormArraySupervisor<
     }
 
     reset(options?: FormOptions) {
-        this._items.reset();
+        this._items.reset(options);
     }
 
     clear(options?: FormOptions) {
@@ -110,12 +110,14 @@ export class FormArraySupervisor<
     }
 
     updateInitialValue(value?: DATA_TYPE[] | undefined) {
-        if (value) {
-            this.supervisors.forEach((supervisor, index) =>
-                supervisor.updateInitialValue(value[index]))
-        }
+        this.supervisors.forEach((supervisor, index) =>
+            supervisor.updateInitialValue(value ? value[index] : undefined))
 
         super.updateInitialValue(value);
+    }
+
+    restore(options?: FormOptions) {
+        super.restore(options);
     }
 
     protected onChange(itemsValue: DATA_TYPE[] | undefined) {
@@ -125,11 +127,17 @@ export class FormArraySupervisor<
         if (itemsValue) {
             if (!CompareHelper.isObject(itemsValue) && CompareHelper.isArray<DATA_TYPE>(itemsValue)) {
                 itemsValue.forEach((itemValue, index) => {
-                    const control = this._items.controls[index] as GetFormArrayGenericClass<FORM_TYPE>;
+                    if (this._items.controls[index] === undefined) {
+                        this.add(itemValue);
+                    }
+
+                    const control =
+                        this._items.controls[index] as GetFormArrayGenericClass<FORM_TYPE>;
 
                     const supervisor =
                         SupervisorHelper.factory<DATA_TYPE[], GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
-                            control, this.determineArrayIndexFn, undefined, this.showLog
+                            control,
+                            this.determineArrayIndexFn
                         )
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)

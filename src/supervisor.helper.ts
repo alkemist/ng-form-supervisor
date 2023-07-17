@@ -25,7 +25,6 @@ export abstract class SupervisorHelper {
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
         itemType?: FormArrayItemInterfaceType<DATA_TYPE, FORM_TYPE>,
-        showLog = false,
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
@@ -36,15 +35,13 @@ export abstract class SupervisorHelper {
                     control,
                     control.value,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormGroup>,
-                    showLog
+                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormGroup>
                 );
             } else {
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
-                    control as FormArray,
+                    control,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormControl>,
-                    showLog
+                    itemType as FormArrayItemInterfaceType<ControlValueType<FORM_TYPE>, FormControl>
                 );
             }
         } else if (control instanceof FormGroup) {
