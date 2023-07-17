@@ -64,8 +64,12 @@ export class FormArraySupervisor<
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
-        this._items.clear();
+        this._items.clear(options);
         itemsValue?.forEach(itemValue => this.add(itemValue));
+    }
+
+    patchValue(value: DATA_TYPE[], options?: FormOptions) {
+        this._items.patchValue(value, options);
     }
 
     reset(options?: FormOptions) {

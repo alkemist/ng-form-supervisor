@@ -26,6 +26,15 @@ export declare type ControlRawValueType<T extends AbstractControl>
 export type GroupRawValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
     = { [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>; }
 
+type RecursivePartial<T> = {
+    [P in keyof T]?:
+    T[P] extends (infer U)[] ? RecursivePartial<U>[] :
+        T[P] extends object | undefined ? RecursivePartial<T[P]> :
+            T[P];
+};
+
+export type PartialGroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
+    = RecursivePartial<{ [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>; }>
 
 export type FormDataType<
     DATA_TYPE,

@@ -187,7 +187,7 @@ function testFormArray<
     expect(array.value).toEqual([testData.resetValue]);
     expect(array.at(0).valid).toBe(false);
     expect(array.valid).toBe(false);
-    
+
     supervisor.clear();
 
     expect(array.value).toEqual([]);
@@ -203,8 +203,21 @@ function testFormArray<
     expect(array.valid).toBe(true);
 
     supervisor.setValue([
-        testData.initialValidItem,
         testData.newValidItem,
+        testData.newValidItem,
+    ]);
+
+    expect(supervisor.hasChange()).toBe(true);
+    expect(supervisor.at(0).hasChange()).toBe(true);
+    expect(supervisor.at(1).hasChange()).toBe(false);
+    expect(array.value).toEqual([
+        testData.newValidItem,
+        testData.newValidItem,
+    ]);
+    expect(array.valid).toBe(true);
+
+    supervisor.patchValue([
+        testData.initialValidItem,
     ]);
 
     expect(supervisor.hasChange()).toBe(true);

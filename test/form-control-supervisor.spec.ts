@@ -16,8 +16,6 @@ describe("FormControlSupervisor", () => {
             invalidValue: "",
             newValue: "new value"
         })
-
-        expect.assertions(19);
     })
 
     it("Object", () => {
@@ -32,8 +30,6 @@ describe("FormControlSupervisor", () => {
             invalidValue: null,
             newValue: {id: 1, name: "user 1 bis"}
         })
-
-        expect.assertions(19);
     });
 });
 

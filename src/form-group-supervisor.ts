@@ -10,6 +10,7 @@ import {
     GetFormGroupGenericClass,
     GroupRawValueType,
     GroupValueType,
+    PartialGroupValueType,
     SupervisorType
 } from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
@@ -97,6 +98,13 @@ export class FormGroupSupervisor<
         this.group.setValue(value, options);
     }
 
+    patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
+        this.group.patchValue(
+            value as GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>,
+            options
+        );
+    }
+
     reset(options?: FormOptions) {
         this.group.reset(undefined, options);
     }
@@ -108,9 +116,9 @@ export class FormGroupSupervisor<
             const supervisor = this.get(property);
 
             if (supervisor instanceof FormArraySupervisor || supervisor instanceof FormGroupSupervisor) {
-                supervisor.clear()
+                supervisor.clear(options)
             } else {
-                (supervisor as FormSupervisor).reset();
+                (supervisor as FormSupervisor).reset(options);
             }
         })
     }

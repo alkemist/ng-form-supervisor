@@ -23,8 +23,25 @@ describe("FormGroupSupervisor", () => {
             }
         }
 
+        const invalidValue: ComplexeUser = {
+            ...initialValue,
+            name: "us",
+            groups: [],
+            profiles: [
+                initialValue.profiles[0],
+                {
+                    username: "",
+                    avatar: ""
+                }
+            ],
+            rights: {
+                ...initialValue.rights,
+                viewProfile: false,
+            }
+        }
+
         const newValue: ComplexeUser = {
-            id: 1,
+            ...initialValue,
             name: "admin",
             groups: ['SUPERADMIN'],
             profiles: [
@@ -93,54 +110,40 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.hasChange()).toBe(false);
         expect(supervisor.valid).toBe(true);
 
-        group.get("name")?.setValue("us");
         (group.get("groups") as FormArray)?.removeAt(0);
+        group.get("rights")?.get("viewProfile")?.setValue(invalidValue.rights.viewProfile);
+
         (group.get("profiles") as FormArray)?.push(new FormGroup({
             username: new FormControl<string>("", [Validators.required]),
-            avatar: new FormControl<string | null>(null),
+            avatar: new FormControl<string | null>(invalidValue.profiles[1].avatar),
         }));
-        group.get("rights")?.get("viewProfile")?.setValue(false)
+        
+        supervisor.patchValue({
+            name: invalidValue.name,
+            profiles: [
+                invalidValue.profiles[0],
+                {
+                    username: invalidValue.profiles[1].username
+                }
+            ]
+        })
 
         expect(supervisor.value).toEqual({
             ...initialValue,
-            name: "us",
-            groups: [],
-            profiles: [
-                {
-                    username: "username1",
-                    avatar: null
-                },
-                {
-                    username: "",
-                    avatar: null
-                }
-            ],
-            rights: {
-                viewProfile: false,
-                viewUsers: false
-            }
+            ...invalidValue
         });
         expect(supervisor.hasChange()).toBe(true);
         expect(supervisor.valid).toBe(false);
-        expect(supervisor.get("id").value).toBe(1);
+        expect(supervisor.get("id").value).toBe(invalidValue.id);
         expect(supervisor.get("id").hasChange()).toBe(false);
         expect(supervisor.get("id").valid).toBe(true);
-        expect(supervisor.get("name").value).toBe("us");
+        expect(supervisor.get("name").value).toBe(invalidValue.name);
         expect(supervisor.get("name").hasChange()).toBe(true);
         expect(supervisor.get("name").valid).toBe(false);
-        expect(supervisor.get("groups").value).toEqual([]);
+        expect(supervisor.get("groups").value).toEqual(invalidValue.groups);
         expect(supervisor.get("groups").hasChange()).toEqual(true);
         expect(supervisor.get("groups").valid).toBe(false);
-        expect(supervisor.get("profiles").value).toEqual([
-            {
-                username: "username1",
-                avatar: null,
-            },
-            {
-                username: "",
-                avatar: null
-            }
-        ]);
+        expect(supervisor.get("profiles").value).toEqual(invalidValue.profiles);
         expect(supervisor.get("profiles").hasChange()).toEqual(true);
         expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
         expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
@@ -149,10 +152,7 @@ describe("FormGroupSupervisor", () => {
         expect(supervisor.get('profiles').at(1).get('username').hasChange()).toBe(false);
         expect(supervisor.get('profiles').at(1).get('avatar').hasChange()).toBe(false);
         expect(supervisor.get("profiles").valid).toBe(false);
-        expect(supervisor.get("rights").value).toEqual({
-            viewProfile: false,
-            viewUsers: false
-        });
+        expect(supervisor.get("rights").value).toEqual(invalidValue.rights);
         expect(supervisor.get("rights").hasChange()).toEqual(true);
         expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(true);
         expect(supervisor.get("rights").get("viewUsers").hasChange()).toBe(false);
