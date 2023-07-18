@@ -73,6 +73,10 @@ export class FormGroupSupervisor<
         this.updateInitialValue();
 
         this.sub.add(this.valueChanges.subscribe((value) => {
+            if (this.showLog) {
+                console.log('[Group] Change detected', value)
+            }
+
             super.onChange(value)
         }));
     }
@@ -98,7 +102,12 @@ export class FormGroupSupervisor<
     }
 
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
-        this.group.setValue(value, options);
+        options = {emitEvent: false, onlySelf: false, ...options};
+        this.group.setValue(value);
+
+        if (!options.emitEvent) {
+            super.onChange(value);
+        }
     }
 
     patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {

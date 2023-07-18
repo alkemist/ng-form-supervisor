@@ -38,6 +38,10 @@ export abstract class FormArraySupervisor<
         this.onChange(this.value);
 
         this.sub.add(this.valueChanges.subscribe((itemsValue) => {
+            if (this.showLog) {
+                console.log('[Array] Change detected', itemsValue)
+            }
+
             this.onChange(itemsValue)
         }));
     }
@@ -63,8 +67,13 @@ export abstract class FormArraySupervisor<
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
+        options = {emitEvent: false, onlySelf: false, ...options};
         this._items.clear(options);
-        itemsValue?.forEach(itemValue => this.push(itemValue));
+        itemsValue?.forEach(itemValue => this.push(itemValue, options));
+
+        if (!options.emitEvent) {
+            super.onChange(itemsValue);
+        }
     }
 
     patchValue(value: DATA_TYPE[], options?: FormOptions) {

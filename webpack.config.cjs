@@ -20,7 +20,6 @@ module.exports = {
     optimization: {
         minimize: true,
         minimizer: [new TerserPlugin({
-            test: /\.js(\?.*)?$/i,
             parallel: true,
             terserOptions: {
                 module: true

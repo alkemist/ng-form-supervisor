@@ -17,6 +17,10 @@ export class FormControlSupervisor<DATA_TYPE>
 
         this.updateInitialValue();
         this.sub.add(this.control.valueChanges.subscribe((value) => {
+            if (this.showLog) {
+                console.log('[Control] Change detected', value)
+            }
+
             super.onChange(value)
         }));
     }
@@ -38,7 +42,12 @@ export class FormControlSupervisor<DATA_TYPE>
     }
 
     setValue(value: DATA_TYPE, options?: FormOptions) {
+        options = {emitEvent: false, onlySelf: false, ...options};
         this.control.setValue(value, options);
+
+        if (!options.emitEvent) {
+            super.onChange(value);
+        }
     }
 
     reset(options?: FormOptions) {

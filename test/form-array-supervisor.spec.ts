@@ -30,7 +30,8 @@ describe("FormArraySupervisor", () => {
             }),
             newValidItem: {id: 2, name: "user 2"},
             invalidFirstItem: {id: 1, name: ""},
-            resetValue: {id: null, name: null}
+            resetValue: {id: null, name: null},
+            newArray: [{id: 3, name: "user3"}, {id: 4, name: "user4"}, {id: 5, name: "user5"}],
         });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormGroupSupervisor);
@@ -51,7 +52,8 @@ describe("FormArraySupervisor", () => {
             newInvalidElement: new FormControl<number | null>(null, [Validators.required]),
             newValidItem: 99,
             invalidFirstItem: null,
-            resetValue: null
+            resetValue: null,
+            newArray: [10, 20, 30],
         });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
@@ -71,7 +73,8 @@ describe("FormArraySupervisor", () => {
             newInvalidElement: new FormControl<BasicUser | null>(null, [Validators.required]),
             newValidItem: {id: 2, name: "user 2"},
             invalidFirstItem: null,
-            resetValue: null
+            resetValue: null,
+            newArray: [{id: 3, name: "user3"}, {id: 4, name: "user4"}, {id: 5, name: "user5"}],
         });
 
         expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
@@ -88,6 +91,7 @@ interface FormArrayTestData<
     newValidItem: DATA_TYPE,
     invalidFirstItem: DATA_TYPE,
     resetValue: any,
+    newArray: DATA_TYPE[],
 }
 
 function testFormArray<
@@ -230,6 +234,24 @@ function testFormArray<
     supervisor.updateInitialValue();
 
     expect(supervisor.hasChange()).toBe(false);
+    expect(array.length).toBe(2);
+
+    supervisor.setValue(testData.newArray);
+
+    expect(supervisor.hasChange()).toBe(true);
+    expect(array.length).toBe(3);
+
+    supervisor.restore();
+
+    expect(supervisor.hasChange()).toBe(false);
+    expect(array.length).toBe(2);
+
+    supervisor.setValue([]);
+
+    expect(supervisor.hasChange()).toBe(true);
+    expect(array.length).toBe(0);
+
+    supervisor.restore();
 
     supervisor.at(0).setValue(testData.invalidFirstItem as never);
     supervisor.push(testData.invalidItem);
