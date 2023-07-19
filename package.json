@@ -1,6 +1,6 @@
 {
   "name": "@alkemist/ng-form-supervisor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Angular Form Supervisor",
   "main": "lib/index.min.mjs",
   "type": "module",
@@ -62,7 +62,7 @@
     "webpack-cli": "^5.1.1"
   },
   "dependencies": {
-    "@alkemist/compare-engine": "^1.2.3",
+    "@alkemist/compare-engine": "^1.2.6",
     "@angular/common": "^16.0.0",
     "@angular/compiler": "^16.0.0",
     "@angular/core": "^16.0.0",
