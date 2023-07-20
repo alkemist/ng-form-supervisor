@@ -1,6 +1,6 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {ValueKey} from "@alkemist/compare-engine";
+import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
 import {
@@ -46,7 +46,7 @@ export class FormGroupSupervisor<
     ) {
         super(determineArrayIndexFn);
 
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         this.supervisors = properties
             .reduce((supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>, property: keyof DATA_TYPE) => {
@@ -105,7 +105,7 @@ export class FormGroupSupervisor<
         options = {emitEvent: false, onlySelf: false, ...options};
         this.group.setValue(value);
 
-        if (!options.emitEvent) {
+        if (options && !options.emitEvent) {
             super.onChange(value);
         }
     }
@@ -122,7 +122,7 @@ export class FormGroupSupervisor<
     }
 
     clear(options?: FormOptions) {
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         properties.forEach((property) => {
             const supervisor = this.get(property);
@@ -136,7 +136,7 @@ export class FormGroupSupervisor<
     }
 
     updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).updateInitialValue(
@@ -148,7 +148,7 @@ export class FormGroupSupervisor<
     }
 
     restore(options?: FormOptions) {
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).restore();
         });
@@ -168,7 +168,7 @@ export class FormGroupSupervisor<
 
     enableLog() {
         super.enableLog();
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).enableLog();
         });
@@ -176,7 +176,7 @@ export class FormGroupSupervisor<
 
     disableLog() {
         super.disableLog();
-        const properties = Object.keys(this.controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
         properties.forEach((property) => {
             (this.get(property) as FormSupervisor).disableLog();
         });

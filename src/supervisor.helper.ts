@@ -79,7 +79,7 @@ export abstract class SupervisorHelper {
         group: FormGroup
     ): FormArrayGroupInterfaceType<DATA_TYPE, FormGroup> {
         const controls = group.controls as Record<keyof DATA_TYPE, AbstractForm>;
-        const properties = Object.keys(controls) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(controls) as (keyof DATA_TYPE)[];
 
         return properties.reduce((formGroupInterface: FormArrayGroupInterfaceType<DATA_TYPE, FormGroup>, property: keyof DATA_TYPE) => {
             const control = controls[property] as AbstractForm;
@@ -151,7 +151,7 @@ export abstract class SupervisorHelper {
         validator: () => {},
         itemValue: DATA_TYPE,
     ): FormGroup<FormGroupInterface<DATA_TYPE>> {
-        const properties = Object.keys(itemInterface) as (keyof DATA_TYPE)[];
+        const properties = CompareHelper.keys(itemInterface) as (keyof DATA_TYPE)[];
 
         const formInterface = properties.reduce(
             (

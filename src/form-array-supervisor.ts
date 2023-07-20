@@ -67,11 +67,16 @@ export abstract class FormArraySupervisor<
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
-        options = {emitEvent: false, onlySelf: false, ...options};
-        this._items.clear(options);
-        itemsValue?.forEach(itemValue => this.push(itemValue, options));
+        const childOptions: FormOptions = options?.onlySelf
+            ? {emitEvent: false, onlySelf: true}
+            : {emitEvent: true, onlySelf: false}
 
-        if (!options.emitEvent) {
+        this._items.clear(options);
+        itemsValue?.forEach(itemValue => this.push(itemValue, childOptions));
+
+        // Si on ne passe pas par l'évènement de mise à jour
+        // on met à jour le moteur de comparaison manuellement
+        if (options && !options.emitEvent) {
             super.onChange(itemsValue);
         }
     }

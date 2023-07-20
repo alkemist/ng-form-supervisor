@@ -42,10 +42,9 @@ export class FormControlSupervisor<DATA_TYPE>
     }
 
     setValue(value: DATA_TYPE, options?: FormOptions) {
-        options = {emitEvent: false, onlySelf: false, ...options};
         this.control.setValue(value, options);
 
-        if (!options.emitEvent) {
+        if (options && !options.emitEvent) {
             super.onChange(value);
         }
     }

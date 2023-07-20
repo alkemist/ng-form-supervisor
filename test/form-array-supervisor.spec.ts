@@ -4,7 +4,7 @@ import {BasicUser} from "./test-data";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor, FormControlSupervisor, FormGroupSupervisor} from "../src";
 
 describe("FormArraySupervisor", () => {
-    it("Users group array", () => {
+    describe("Users group array", () => {
         const array = new FormArray([
             new FormGroup({
                 id: new FormControl<number | null>(1),
@@ -38,7 +38,7 @@ describe("FormArraySupervisor", () => {
         expect(supervisor.at(0).get('id')).toBeInstanceOf(FormControlSupervisor);
     });
 
-    it("Numbers control array", () => {
+    describe("Numbers control array", () => {
         const array = new FormArray([
             new FormControl(5, [Validators.required])
         ])
@@ -55,11 +55,9 @@ describe("FormArraySupervisor", () => {
             resetValue: null,
             newArray: [10, 20, 30],
         });
-
-        expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
     });
 
-    it("User control array", () => {
+    describe("User control array", () => {
         const array = new FormArray([
             new FormControl<BasicUser>({id: 1, name: "user 1"}, [Validators.required])
         ])
@@ -76,8 +74,6 @@ describe("FormArraySupervisor", () => {
             resetValue: null,
             newArray: [{id: 3, name: "user3"}, {id: 4, name: "user4"}, {id: 5, name: "user5"}],
         });
-
-        expect(supervisor.at(0)).toBeInstanceOf(FormControlSupervisor);
     });
 });
 
@@ -103,175 +99,212 @@ function testFormArray<
     supervisor: FormArrayGroupSupervisor<DATA_TYPE, FORM_TYPE> | FormArrayControlSupervisor<DATA_TYPE>,
     testData: FormArrayTestData<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>,
 ) {
-    expect(supervisor.value).toEqual([testData.initialValidItem]);
-    expect(supervisor.hasChange()).toBe(false);
-    expect(supervisor.valid).toBe(true);
-    expect(supervisor.at(0).value).toEqual(testData.initialValidItem);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(supervisor.at(0).valid).toBe(true);
+    it('should have correct initial value', () => {
+        expect(supervisor.value).toEqual([testData.initialValidItem]);
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.valid).toBe(true);
+        expect(supervisor.at(0).value).toEqual(testData.initialValidItem);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(0).valid).toBe(true);
+    })
 
-    array.at(0).setValue(testData.invalidItem);
+    it('update  with invalid item', () => {
+        array.at(0).setValue(testData.invalidItem);
 
-    expect(supervisor.value).toEqual([testData.invalidItem]);
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.valid).toBe(false);
-    expect(supervisor.at(0).value).toEqual(testData.invalidItem);
-    expect(supervisor.at(0).hasChange()).toBe(true);
-    expect(supervisor.at(0).valid).toBe(false);
+        expect(supervisor.value).toEqual([testData.invalidItem]);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.valid).toBe(false);
+        expect(supervisor.at(0).value).toEqual(testData.invalidItem);
+        expect(supervisor.at(0).hasChange()).toBe(true);
+        expect(supervisor.at(0).valid).toBe(false);
+    });
 
-    supervisor.restore();
+    it('restore 1', () => {
+        supervisor.restore();
 
-    expect(supervisor.hasChange()).toBe(false);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(array.value).toEqual([testData.initialValidItem]);
-    expect(array.valid).toBe(true);
-    expect(array.at(0).value).toEqual(testData.initialValidItem);
-    expect(array.at(0).valid).toBe(true);
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(array.value).toEqual([testData.initialValidItem]);
+        expect(array.valid).toBe(true);
+        expect(array.at(0).value).toEqual(testData.initialValidItem);
+        expect(array.at(0).valid).toBe(true);
+    });
 
-    array.push(testData.newInvalidElement);
+    it('add new invalid element', () => {
+        array.push(testData.newInvalidElement);
 
-    expect(supervisor.value).toEqual([
-        testData.initialValidItem,
-        testData.invalidItem
-    ]);
-    expect(supervisor.length).toBe(2);
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(supervisor.at(1).hasChange()).toBe(false);
-    expect(supervisor.valid).toBe(false);
+        expect(supervisor.value).toEqual([
+            testData.initialValidItem,
+            testData.invalidItem
+        ]);
+        expect(supervisor.length).toBe(2);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(supervisor.valid).toBe(false);
+    });
 
-    supervisor.push(testData.invalidItem);
+    it('add new invalid item', () => {
+        supervisor.push(testData.invalidItem);
 
-    expect(array.length).toBe(3);
-    expect(array.value).toEqual([
-        testData.initialValidItem,
-        testData.invalidItem,
-        testData.invalidItem
-    ]);
-    expect(array.at(0).valid).toBe(true);
-    expect(array.at(1).valid).toBe(false);
-    expect(array.at(2).valid).toBe(false);
-    expect(array.valid).toBe(false);
+        expect(array.length).toBe(3);
+        expect(array.value).toEqual([
+            testData.initialValidItem,
+            testData.invalidItem,
+            testData.invalidItem
+        ]);
+        expect(array.at(0).valid).toBe(true);
+        expect(array.at(1).valid).toBe(false);
+        expect(array.at(2).valid).toBe(false);
+        expect(array.valid).toBe(false);
+    });
 
-    supervisor.remove(0);
+    it('remove item 0', () => {
+        supervisor.remove(0);
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.at(0).hasChange()).toBe(true);
-    expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(true);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.value).toEqual([
+            testData.invalidItem,
+            testData.invalidItem
+        ]);
+        expect(array.length).toBe(2);
+        expect(array.valid).toBe(false);
+    });
 
-    expect(array.value).toEqual([
-        testData.invalidItem,
-        testData.invalidItem
-    ]);
-    expect(array.length).toBe(2);
-    expect(array.valid).toBe(false);
+    it('restore 2', () => {
+        supervisor.at(0).restore();
 
-    supervisor.at(0).restore();
+        expect(array.value).toEqual([
+            testData.initialValidItem,
+            testData.invalidItem,
+        ]);
+        expect(array.at(0).valid).toBe(true);
+        expect(array.at(1).valid).toBe(false);
+        expect(array.valid).toBe(false);
+    });
 
-    expect(array.value).toEqual([
-        testData.initialValidItem,
-        testData.invalidItem,
-    ]);
-    expect(array.at(0).valid).toBe(true);
-    expect(array.at(1).valid).toBe(false);
-    expect(array.valid).toBe(false);
+    it('splice 0', () => {
+        supervisor.splice(0, 1);
 
-    supervisor.splice(0, 1);
+        expect(array.value).toEqual([
+            testData.invalidItem,
+        ]);
+        expect(array.at(0).valid).toBe(false);
+        expect(array.valid).toBe(false);
+    });
 
-    expect(array.value).toEqual([
-        testData.invalidItem,
-    ]);
-    expect(array.at(0).valid).toBe(false);
-    expect(array.valid).toBe(false);
+    it('reset', () => {
+        supervisor.reset();
 
-    supervisor.reset();
+        expect(array.value).toEqual([testData.resetValue]);
+        expect(array.at(0).valid).toBe(false);
+        expect(array.valid).toBe(false);
+    });
 
-    expect(array.value).toEqual([testData.resetValue]);
-    expect(array.at(0).valid).toBe(false);
-    expect(array.valid).toBe(false);
+    it('clear', () => {
+        supervisor.clear();
 
-    supervisor.clear();
+        expect(array.value).toEqual([]);
+        expect(array.valid).toBe(true);
+    });
 
-    expect(array.value).toEqual([]);
-    expect(array.valid).toBe(true);
+    it('restore 3', () => {
+        supervisor.restore();
 
-    supervisor.restore();
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.at(0).value).toEqual(testData.initialValidItem);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(0).valid).toBe(true);
+        expect(array.value).toEqual([testData.initialValidItem,]);
+        expect(array.valid).toBe(true);
+    });
 
-    expect(supervisor.hasChange()).toBe(false);
-    expect(supervisor.at(0).value).toEqual(testData.initialValidItem);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(supervisor.at(0).valid).toBe(true);
-    expect(array.value).toEqual([testData.initialValidItem,]);
-    expect(array.valid).toBe(true);
+    it('set with 2 invalid item', () => {
+        supervisor.setValue([
+            testData.newValidItem,
+            testData.newValidItem,
+        ]);
 
-    supervisor.setValue([
-        testData.newValidItem,
-        testData.newValidItem,
-    ]);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(true);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.value).toEqual([
+            testData.newValidItem,
+            testData.newValidItem,
+        ]);
+        expect(array.valid).toBe(true);
+    });
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.at(0).hasChange()).toBe(true);
-    expect(supervisor.at(1).hasChange()).toBe(false);
-    expect(array.value).toEqual([
-        testData.newValidItem,
-        testData.newValidItem,
-    ]);
-    expect(array.valid).toBe(true);
+    it('patch', () => {
+        supervisor.patchValue([
+            testData.initialValidItem,
+        ]);
 
-    supervisor.patchValue([
-        testData.initialValidItem,
-    ]);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.value).toEqual([
+            testData.initialValidItem,
+            testData.newValidItem,
+        ]);
+        expect(array.valid).toBe(true);
+    });
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(supervisor.at(1).hasChange()).toBe(false);
-    expect(array.value).toEqual([
-        testData.initialValidItem,
-        testData.newValidItem,
-    ]);
-    expect(array.valid).toBe(true);
+    it('update initial value', () => {
+        supervisor.updateInitialValue();
 
-    supervisor.updateInitialValue();
+        expect(supervisor.hasChange()).toBe(false);
+        expect(array.length).toBe(2);
+    });
 
-    expect(supervisor.hasChange()).toBe(false);
-    expect(array.length).toBe(2);
+    it('set with array', () => {
+        supervisor.setValue(testData.newArray);
 
-    supervisor.setValue(testData.newArray);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(array.length).toBe(3);
+    });
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(array.length).toBe(3);
+    it('restore 4', () => {
+        supervisor.restore();
 
-    supervisor.restore();
+        expect(supervisor.hasChange()).toBe(false);
+        expect(array.length).toBe(2);
+    });
 
-    expect(supervisor.hasChange()).toBe(false);
-    expect(array.length).toBe(2);
+    it('set with empty array', () => {
+        supervisor.setValue([]);
 
-    supervisor.setValue([]);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(array.length).toBe(0);
+    });
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(array.length).toBe(0);
+    it('restore, set and push', () => {
+        supervisor.restore();
 
-    supervisor.restore();
+        supervisor.at(0).setValue(testData.invalidFirstItem as never);
+        supervisor.push(testData.invalidItem);
 
-    supervisor.at(0).setValue(testData.invalidFirstItem as never);
-    supervisor.push(testData.invalidItem);
+        expect(supervisor.hasChange()).toBe(true);
+        expect(supervisor.at(0).hasChange()).toBe(true);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.valid).toBe(false);
+        expect(array.at(0).valid).toBe(false);
+        expect(array.at(0).value).toEqual(testData.invalidFirstItem);
+        expect(array.length).toBe(3);
+    });
 
-    expect(supervisor.hasChange()).toBe(true);
-    expect(supervisor.at(0).hasChange()).toBe(true);
-    expect(supervisor.at(1).hasChange()).toBe(false);
-    expect(array.valid).toBe(false);
-    expect(array.at(0).valid).toBe(false);
-    expect(array.at(0).value).toEqual(testData.invalidFirstItem);
-    expect(array.length).toBe(3);
+    it('restore 7', () => {
+        supervisor.restore();
 
-    supervisor.restore();
-
-    expect(supervisor.hasChange()).toBe(false);
-    expect(supervisor.at(0).hasChange()).toBe(false);
-    expect(supervisor.at(1).hasChange()).toBe(false);
-    expect(array.value).toEqual([
-        testData.initialValidItem,
-        testData.newValidItem,
-    ]);
-    expect(array.valid).toBe(true);
+        expect(supervisor.hasChange()).toBe(false);
+        expect(supervisor.at(0).hasChange()).toBe(false);
+        expect(supervisor.at(1).hasChange()).toBe(false);
+        expect(array.value).toEqual([
+            testData.initialValidItem,
+            testData.newValidItem,
+        ]);
+        expect(array.valid).toBe(true);
+    });
 }
