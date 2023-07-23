@@ -67,18 +67,41 @@ export abstract class FormArraySupervisor<
     }
 
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions) {
-        const childOptions: FormOptions = options?.onlySelf
-            ? {emitEvent: false, onlySelf: true}
-            : {emitEvent: true, onlySelf: false}
-
-        this._items.clear(options);
-        itemsValue?.forEach(itemValue => this.push(itemValue, childOptions));
-
-        // Si on ne passe pas par l'évènement de mise à jour
-        // on met à jour le moteur de comparaison manuellement
-        if (options && !options.emitEvent) {
-            super.onChange(itemsValue);
+        const emitEvent = options?.emitEvent ?? true;
+        if (this.showLog) {
+            console.log('[Array] Set value', emitEvent, itemsValue)
         }
+
+        if (itemsValue) {
+            itemsValue.forEach(
+                (itemValue, index) => {
+                    if (index < this._items.length) {
+                        this.at(index).setValue(itemValue, {emitEvent: false});
+                    } else {
+                        this.push(itemValue, {emitEvent: false});
+                    }
+                });
+        }
+
+        if (!itemsValue || this._items.length > itemsValue.length) {
+            const firstIndex = itemsValue ? itemsValue.length : 0;
+            const itemLength = this._items.length;
+            for (let i = firstIndex; i < itemLength; i++) {
+                this.remove(firstIndex, {emitEvent: false});
+            }
+        }
+
+        if (emitEvent && itemsValue) {
+            this._items.setValue(itemsValue);
+        } else {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange(itemsValue);
+        }
+    }
+
+    move(oldIndex: number, newIndex: number) {
+        console.log('@TODO', oldIndex, '=>', newIndex);
     }
 
     patchValue(value: DATA_TYPE[], options?: FormOptions) {
@@ -109,6 +132,10 @@ export abstract class FormArraySupervisor<
             itemValue
         );
 
+        if (this.showLog) {
+            console.log('[Array] Add item', item, item.value)
+        }
+
         this._items.push(item, options);
     }
 
@@ -121,8 +148,8 @@ export abstract class FormArraySupervisor<
         this._items.insert(item, index, options);
     }
 
-    remove(index: number) {
-        this._items.removeAt(index);
+    remove(index: number, options?: FormOptions) {
+        this._items.removeAt(index, options);
     }
 
     splice(start: number, deleteCount?: number) {
@@ -142,6 +169,10 @@ export abstract class FormArraySupervisor<
     }
 
     restore(options?: FormOptions) {
+        this.supervisors.forEach((supervisor) =>
+            supervisor.restore(options)
+        );
+
         super.restore(options);
     }
 
@@ -157,7 +188,7 @@ export abstract class FormArraySupervisor<
             supervisor.disableLog());
     }
 
-    protected onChange(itemsValue: DATA_TYPE[] | undefined) {
+    onChange(itemsValue: DATA_TYPE[] | undefined) {
         super.onChange(itemsValue);
         this.supervisors = [];
 
@@ -179,7 +210,6 @@ export abstract class FormArraySupervisor<
                             this.determineArrayIndexFn,
                             this.itemType
                         )
-
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
                         && CompareHelper.isArray(this.compareEngine.leftValue)) {

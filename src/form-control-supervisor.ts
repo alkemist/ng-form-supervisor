@@ -21,7 +21,7 @@ export class FormControlSupervisor<DATA_TYPE>
                 console.log('[Control] Change detected', value)
             }
 
-            super.onChange(value)
+            this.onChange(value)
         }));
     }
 
@@ -42,10 +42,17 @@ export class FormControlSupervisor<DATA_TYPE>
     }
 
     setValue(value: DATA_TYPE, options?: FormOptions) {
-        this.control.setValue(value, options);
+        const emitEvent = options?.emitEvent ?? true;
+        if (this.showLog) {
+            console.log('[Control] Set value', emitEvent, value)
+        }
 
-        if (options && !options.emitEvent) {
-            super.onChange(value);
+        if (emitEvent) {
+            this.control.setValue(value);
+        } else {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange(value);
         }
     }
 

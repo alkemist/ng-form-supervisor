@@ -77,7 +77,7 @@ export class FormGroupSupervisor<
                 console.log('[Group] Change detected', value)
             }
 
-            super.onChange(value)
+            this.onChange(value)
         }));
     }
 
@@ -102,11 +102,23 @@ export class FormGroupSupervisor<
     }
 
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
-        options = {emitEvent: false, onlySelf: false, ...options};
-        this.group.setValue(value);
+        const emitEvent = options?.emitEvent ?? true;
+        if (this.showLog) {
+            console.log('[Group] Set value', emitEvent, value)
+        }
 
-        if (options && !options.emitEvent) {
-            super.onChange(value);
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).setValue(value[property], {emitEvent: false});
+        });
+
+        if (emitEvent) {
+            this.form.setValue(value);
+        } else {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange(value);
         }
     }
 

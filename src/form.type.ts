@@ -20,6 +20,8 @@ export declare type ControlValueType<T extends AbstractControl> = T extends Abst
 export type GroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterface<any>, DATA_TYPE>
     = { [K in keyof FORM_GROUP_INTERFACE]: ControlValueType<FORM_GROUP_INTERFACE[K]>; }
 
+export type GenericFormDataValueType<DATA_TYPE> = GroupValueType<GetFormGroupGenericClass<FormGroup, DATA_TYPE>, DATA_TYPE>
+
 export declare type ControlRawValueType<T extends AbstractControl>
     = T extends AbstractControl ? (T['setValue'] extends ((v: infer R) => void) ? R : never) : never;
 

@@ -62,7 +62,7 @@ export abstract class FormSupervisor<
         this.showLog = false;
     }
 
-    protected onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined) {
+    onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined) {
         this.compareEngine.updateRight(value);
         this.compareEngine.updateCompareIndex();
     }

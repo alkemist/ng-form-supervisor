@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "es2022",
+    "module": "ES2022",
     "moduleResolution": "nodenext",
     "allowJs": false,
     "checkJs": false,
@@ -15,7 +15,12 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": [
+      "ES2022",
+      "dom",
+      "es2021.weakref"
+    ]
   },
   "exclude": [
     "node_modules",

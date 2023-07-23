@@ -21,6 +21,6 @@ export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends 
     restore(options?: FormOptions): void;
     enableLog(): void;
     disableLog(): void;
-    protected onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined): void;
+    onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined): void;
 }
 //# sourceMappingURL=form-supervisor.d.ts.map

@@ -1,78 +1,85 @@
-import {describe, expect, it} from "@jest/globals";
+import {
+    FormArrayControlSupervisor,
+    FormArrayGroupSupervisor,
+    FormControlSupervisor,
+    FormGroupSupervisor,
+    GenericFormDataValueType
+} from "../src";
+import {ComplexeUser, USER_GROUP, UserProfile, UserRights} from "./test-data";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
-import {ComplexeUser, USER_GROUP} from "./test-data";
-import {FormArrayControlSupervisor, FormArrayGroupSupervisor, FormControlSupervisor, FormGroupSupervisor} from "../src";
+
 
 describe("FormGroupSupervisor", () => {
-    describe("ComplexeUser", () => {
-        const initialValue: ComplexeUser = {
-            id: 1,
-            name: "user 1",
-            groups: ["USER"],
-            profiles: [
-                {
-                    username: "username1",
-                    avatar: null,
-                    badges: ['first'],
-                }
-            ],
-            rights: {
-                viewProfile: true,
-                viewUsers: false
+    const initialValue: ComplexeUser = {
+        id: 1,
+        name: "user 1",
+        groups: ["USER"],
+        profiles: [
+            {
+                username: "username1",
+                avatar: null,
+                badges: ['first'],
             }
+        ],
+        rights: {
+            viewProfile: true,
+            viewUsers: false
         }
+    }
 
-        const invalidValue: ComplexeUser = {
-            ...initialValue,
-            name: "us",
-            groups: [],
-            profiles: [
-                initialValue.profiles[0],
-                {
-                    username: "",
-                    avatar: "",
-                    badges: [],
-                }
-            ],
-            rights: {
-                ...initialValue.rights,
-                viewProfile: false,
+    const invalidValue: ComplexeUser = {
+        ...initialValue,
+        name: "us",
+        groups: [],
+        profiles: [
+            initialValue.profiles[0],
+            {
+                username: "",
+                avatar: "",
+                badges: [],
             }
+        ],
+        rights: {
+            ...initialValue.rights,
+            viewProfile: false,
         }
+    }
 
-        const newValue: ComplexeUser = {
-            ...initialValue,
-            name: "admin",
-            groups: ['SUPERADMIN'],
-            profiles: [
-                {
-                    username: "username1-bis",
-                    avatar: null,
-                    badges: ["first"],
-                },
-                {
-                    username: "username2",
-                    avatar: null,
-                    badges: [],
-                }
-            ],
-            rights: {
-                viewProfile: true,
-                viewUsers: true
+    const newValue: ComplexeUser = {
+        ...initialValue,
+        name: "admin",
+        groups: ['SUPERADMIN'],
+        profiles: [
+            {
+                username: "username1-bis",
+                avatar: null,
+                badges: ["first"],
+            },
+            {
+                username: "username2",
+                avatar: null,
+                badges: [],
             }
+        ],
+        rights: {
+            viewProfile: true,
+            viewUsers: true
         }
+    }
 
-        const newValueBis: ComplexeUser = {
-            ...newValue,
-            profiles: [
-                newValue.profiles[0],
-                {
-                    ...newValue.profiles[1],
-                    badges: ["new"],
-                }
-            ],
-        }
+    const newValueBis: ComplexeUser = {
+        ...newValue,
+        profiles: [
+            newValue.profiles[0],
+            {
+                ...newValue.profiles[1],
+                badges: ["new"],
+            }
+        ],
+    }
 
+
+    describe("Changes", () => {
         const group =
             new FormGroup({
                 id: new FormControl<number | null>(initialValue.id),
@@ -333,5 +340,316 @@ describe("FormGroupSupervisor", () => {
             expect(group.value).toEqual(newValueBis);
             expect(group.valid).toBe(true);
         });
+    })
+
+    describe("Events", () => {
+        const group =
+            new FormGroup({
+                id: new FormControl<number | null>(initialValue.id),
+                name: new FormControl<string | null>(initialValue.name, [
+                    Validators.required,
+                    Validators.minLength(3),
+                ]),
+                groups: new FormArray([
+                    new FormControl<USER_GROUP>(initialValue.groups[0])
+                ], [Validators.required]),
+
+                profiles: new FormArray([
+                    new FormGroup({
+                        username: new FormControl<string>(initialValue.profiles[0].username, [Validators.required]),
+                        avatar: new FormControl<string | null>(initialValue.profiles[0].avatar),
+                        badges: new FormArray([
+                            new FormControl<string | null>(initialValue.profiles[0].badges[0])
+                        ]),
+                    })
+                ], [Validators.required]),
+
+                rights: new FormGroup({
+                    viewProfile: new FormControl<boolean | null>(initialValue.rights.viewProfile),
+                    viewUsers: new FormControl<boolean | null>(initialValue.rights.viewUsers),
+                }),
+            });
+
+        const supervisor =
+            new FormGroupSupervisor(group, group.value as ComplexeUser);
+
+        let onChangeSpy: jest.SpyInstance,
+            nameSetValueSpy: jest.SpyInstance,
+            nameOnChangeSpy: jest.SpyInstance,
+            groupsSetValueSpy: jest.SpyInstance,
+            groupsOnChangeSpy: jest.SpyInstance,
+            group0SetValueSpy: jest.SpyInstance,
+            group0OnChangeSpy: jest.SpyInstance,
+            profilesSetValueSpy: jest.SpyInstance,
+            profilesOnChangeSpy: jest.SpyInstance,
+            profile0SetValueSpy: jest.SpyInstance,
+            profile0OnChangeSpy: jest.SpyInstance,
+            profile0UsernameSetValueSpy: jest.SpyInstance,
+            profile0UsernameOnChangeSpy: jest.SpyInstance,
+            rightsSetValueSpy: jest.SpyInstance,
+            rightsOnChangeSpy: jest.SpyInstance,
+            rightsViewUsersSetValueSpy: jest.SpyInstance,
+            rightsViewUsersOnChangeSpy: jest.SpyInstance
+        ;
+        let userValue: GenericFormDataValueType<ComplexeUser> | null = null,
+            userName: string | null = null,
+            userGroups: USER_GROUP[] | null = null,
+            userGroup0: USER_GROUP | null = null,
+            userProfiles: UserProfile[] | null = null,
+            userProfile0: GenericFormDataValueType<UserProfile> | null = null,
+            userProfile0Username: string | null = null,
+            userRights: GenericFormDataValueType<UserRights> | null = null,
+            userRightsViewUsers: boolean | null = null
+        ;
+
+
+        supervisor.valueChanges.subscribe((value) => {
+            userValue = value;
+        });
+        supervisor.get('name').valueChanges.subscribe((value) => {
+            userName = value;
+        });
+        supervisor.get('groups').valueChanges.subscribe((value) => {
+            userGroups = value;
+        });
+        supervisor.get('groups').at(0).valueChanges.subscribe((value) => {
+            userGroup0 = value;
+        });
+        supervisor.get('profiles').valueChanges.subscribe((value) => {
+            userProfiles = value;
+        });
+        supervisor.get('profiles').at(0).valueChanges.subscribe((value) => {
+            userProfile0 = value;
+        });
+        supervisor.get('profiles').at(0).get('username').valueChanges.subscribe((value) => {
+            userProfile0Username = value;
+        });
+        supervisor.get('rights').valueChanges.subscribe((value) => {
+            userRights = value;
+        });
+        supervisor.get('rights').get('viewUsers').valueChanges.subscribe((value) => {
+            userRightsViewUsers = value;
+        });
+
+        const reset = () => {
+            supervisor.restore();
+
+            onChangeSpy = jest.spyOn(supervisor, 'onChange');
+            nameSetValueSpy = jest.spyOn(supervisor.get('name'), 'setValue');
+            nameOnChangeSpy = jest.spyOn(supervisor.get('name'), 'onChange');
+            groupsSetValueSpy = jest.spyOn(supervisor.get('groups'), 'setValue');
+            groupsOnChangeSpy = jest.spyOn(supervisor.get('groups'), 'onChange');
+            group0SetValueSpy = jest.spyOn(supervisor.get('groups').at(0), 'setValue');
+            group0OnChangeSpy = jest.spyOn(supervisor.get('groups').at(0), 'onChange');
+            profilesSetValueSpy = jest.spyOn(supervisor.get('profiles'), 'setValue');
+            profilesOnChangeSpy = jest.spyOn(supervisor.get('profiles'), 'onChange');
+            profile0SetValueSpy = jest.spyOn(supervisor.get('profiles').at(0), 'setValue');
+            profile0OnChangeSpy = jest.spyOn(supervisor.get('profiles').at(0), 'onChange');
+            profile0UsernameSetValueSpy = jest.spyOn(supervisor.get('profiles').at(0).get('username'), 'setValue');
+            profile0UsernameOnChangeSpy = jest.spyOn(supervisor.get('profiles').at(0).get('username'), 'onChange');
+            rightsSetValueSpy = jest.spyOn(supervisor.get('rights'), 'setValue');
+            rightsOnChangeSpy = jest.spyOn(supervisor.get('rights'), 'onChange');
+            rightsViewUsersSetValueSpy = jest.spyOn(supervisor.get('rights').get('viewUsers'), 'setValue');
+            rightsViewUsersOnChangeSpy = jest.spyOn(supervisor.get('rights').get('viewUsers'), 'onChange');
+
+            onChangeSpy.mockReset();
+            nameSetValueSpy.mockReset();
+            nameOnChangeSpy.mockReset();
+            groupsSetValueSpy.mockReset();
+            groupsOnChangeSpy.mockReset();
+            group0SetValueSpy.mockReset();
+            group0OnChangeSpy.mockReset();
+            profilesSetValueSpy.mockReset();
+            profilesOnChangeSpy.mockReset();
+            profile0SetValueSpy.mockReset();
+            profile0OnChangeSpy.mockReset();
+            profile0UsernameSetValueSpy.mockReset();
+            profile0UsernameOnChangeSpy.mockReset();
+            rightsSetValueSpy.mockReset();
+            rightsOnChangeSpy.mockReset();
+            rightsViewUsersSetValueSpy.mockReset();
+            rightsViewUsersOnChangeSpy.mockReset();
+
+            userValue = null;
+            userName = null;
+            userGroups = null;
+            userGroup0 = null;
+            userProfiles = null;
+            userProfile0 = null;
+            userProfile0Username = null;
+            userRights = null;
+            userRightsViewUsers = null;
+        };
+
+        describe('should fire changes', () => {
+            beforeAll(() => {
+                reset();
+
+                supervisor.setValue(newValue);
+            })
+
+            it('should fire form changes', () => {
+                expect(onChangeSpy).toBeCalledWith(newValue);
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(userValue).toEqual(newValue);
+            })
+
+            it('should fire name changes', () => {
+                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false});
+                expect(nameOnChangeSpy).toBeCalledWith(newValue.name);
+                // First on Supervisors.forEach, second on FormGroup.setValue
+                expect(nameOnChangeSpy).toBeCalledTimes(2);
+                expect(userName).toEqual(newValue.name);
+            });
+
+            it('should fire groups changes', () => {
+                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false});
+                expect(groupsOnChangeSpy).toBeCalledWith(newValue.groups);
+                expect(groupsOnChangeSpy).toBeCalledTimes(2);
+                expect(userGroups).toEqual(newValue.groups);
+            });
+
+            it('should fire group 0 changes', () => {
+                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {"emitEvent": false});
+                expect(group0OnChangeSpy).toBeCalledWith(newValue.groups[0]);
+                expect(group0OnChangeSpy).toBeCalledTimes(2);
+                expect(userGroup0).toEqual(newValue.groups[0]);
+            });
+
+            it('should fire profiles changes', () => {
+                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {"emitEvent": false});
+                expect(profilesOnChangeSpy).toBeCalledWith(newValue.profiles);
+                expect(profilesOnChangeSpy).toBeCalledTimes(2);
+                expect(userProfiles).toEqual(newValue.profiles);
+            });
+
+            it('should fire profile 0 changes', () => {
+                expect(profile0SetValueSpy).toBeCalledWith(newValue.profiles[0], {
+                    "emitEvent": false,
+                });
+                expect(profile0OnChangeSpy).toBeCalledWith(newValue.profiles[0]);
+                expect(profile0OnChangeSpy).toBeCalledTimes(2);
+                expect(userProfile0).toEqual(newValue.profiles[0]);
+            });
+
+            it('should fire profile 0 username changes', () => {
+                expect(profile0UsernameSetValueSpy).toBeCalledWith(newValue.profiles[0].username, {
+                    "emitEvent": false,
+                });
+                expect(profile0UsernameOnChangeSpy).toBeCalledWith(newValue.profiles[0].username);
+                expect(profile0UsernameOnChangeSpy).toBeCalledTimes(2);
+                expect(userProfile0Username).toEqual(newValue.profiles[0].username);
+            });
+
+            it('should fire rights changes', () => {
+                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false});
+                expect(rightsOnChangeSpy).toBeCalledWith(newValue.rights);
+                expect(rightsOnChangeSpy).toBeCalledTimes(2);
+                expect(userRights).toEqual(newValue.rights);
+            });
+
+            it('should fire rights view users changes', () => {
+                expect(rightsViewUsersSetValueSpy).toBeCalledWith(newValue.rights.viewUsers, {
+                    "emitEvent": false,
+                });
+                expect(rightsViewUsersOnChangeSpy).toBeCalledWith(newValue.rights.viewUsers);
+                expect(rightsViewUsersOnChangeSpy).toBeCalledTimes(2);
+                expect(userRightsViewUsers).toEqual(newValue.rights.viewUsers);
+            });
+        });
+
+        describe('should not fire changes', () => {
+            beforeAll(() => {
+                reset();
+
+                supervisor.setValue(newValue, {emitEvent: false});
+            })
+
+            it('should fire form changes', () => {
+                expect(onChangeSpy).toBeCalledWith(newValue);
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(userValue).toEqual(null)
+            })
+
+            it('should fire name changes', () => {
+                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false});
+                expect(nameOnChangeSpy).toBeCalledWith(newValue.name);
+                // First on Supervisors.forEach, second on FormGroup.setValue
+                expect(nameOnChangeSpy).toBeCalledTimes(1);
+                expect(userName).toEqual(null)
+            });
+
+            it('should fire groups changes', () => {
+                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false});
+                expect(groupsOnChangeSpy).toBeCalledWith(newValue.groups);
+                expect(groupsOnChangeSpy).toBeCalledTimes(1);
+                expect(userGroups).toEqual(null)
+            });
+
+
+            it('should fire group 0 changes', () => {
+                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {"emitEvent": false});
+                expect(group0OnChangeSpy).toBeCalledWith(newValue.groups[0]);
+                expect(group0OnChangeSpy).toBeCalledTimes(1);
+                expect(userGroup0).toEqual(null)
+            });
+
+            it('should fire profiles changes', () => {
+                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {"emitEvent": false});
+                expect(profilesOnChangeSpy).toBeCalledWith(newValue.profiles);
+                expect(profilesOnChangeSpy).toBeCalledTimes(1);
+                expect(userProfiles).toEqual(null)
+            });
+
+            it('should fire profile 0 changes', () => {
+                expect(profile0SetValueSpy).toBeCalledWith(newValue.profiles[0], {
+                    "emitEvent": false,
+                });
+                expect(profile0OnChangeSpy).toBeCalledWith(newValue.profiles[0]);
+                expect(profile0OnChangeSpy).toBeCalledTimes(1);
+                expect(userProfile0).toEqual(null)
+            });
+
+            it('should fire profile 0 username changes', () => {
+                expect(profile0UsernameSetValueSpy).toBeCalledWith(newValue.profiles[0].username, {
+                    "emitEvent": false,
+                });
+                expect(profile0UsernameOnChangeSpy).toBeCalledWith(newValue.profiles[0].username);
+                expect(profile0UsernameOnChangeSpy).toBeCalledTimes(1);
+                expect(userProfile0Username).toEqual(null)
+            });
+
+            it('should fire rights changes', () => {
+                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false});
+                expect(rightsOnChangeSpy).toBeCalledWith(newValue.rights);
+                expect(rightsOnChangeSpy).toBeCalledTimes(1);
+                expect(userRights).toEqual(null)
+            });
+
+            it('should fire rights view users changes', () => {
+                expect(rightsViewUsersSetValueSpy).toBeCalledWith(newValue.rights.viewUsers, {
+                    "emitEvent": false,
+                });
+                expect(rightsViewUsersOnChangeSpy).toBeCalledWith(newValue.rights.viewUsers);
+                expect(rightsViewUsersOnChangeSpy).toBeCalledTimes(1);
+                expect(userRightsViewUsers).toEqual(null)
+            });
+        });
+
+        /*it('', () => {
+            supervisor.setValue({...invalidValue, id: 2}, {emitEvent: false});
+
+            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 2});
+            expect(idSetValueSpy).toBeCalledWith(2, {"emitEvent": true, "onlySelf": false});
+            expect(idOnChangeSpy).not.toBeCalled();
+
+            supervisor.setValue({...invalidValue, id: 3}, {emitEvent: false, onlySelf: false});
+
+            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 3});
+
+            supervisor.setValue({...invalidValue, id: 4}, {onlySelf: false});
+
+            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 4});
+        })*/
     })
 });
