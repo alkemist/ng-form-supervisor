@@ -636,6 +636,63 @@ describe("FormGroupSupervisor", () => {
             });
         });
 
+
+        describe('should fire on child change', () => {
+            beforeAll(() => {
+                reset();
+
+                supervisor.get('groups').setValue(newValue.groups);
+            });
+
+            it('should fire form changes', () => {
+                expect(onChangeSpy).toBeCalledWith({
+                    ...initialValue,
+                    groups: newValue.groups
+                });
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(userValue).toEqual({
+                    ...initialValue,
+                    groups: newValue.groups
+                })
+            })
+        });
+
+
+        describe('should not fire on child change 1', () => {
+            beforeAll(() => {
+                reset();
+
+                supervisor.get('groups').setValue(newValue.groups, {emitEvent: false});
+            });
+
+            it('should fire form changes', () => {
+                expect(onChangeSpy).not.toBeCalled();
+                expect(supervisor.get('groups').value).toEqual(newValue.groups);
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    groups: newValue.groups
+                })
+            })
+        });
+
+
+        describe('should not fire on child change 2', () => {
+            beforeAll(() => {
+                reset();
+
+                supervisor.get('rights').get('viewUsers').setValue(newValue.rights.viewUsers, {emitEvent: false});
+            });
+
+            it('should fire form changes', () => {
+                expect(onChangeSpy).not.toBeCalled();
+                expect(supervisor.get('rights').value).toEqual(newValue.rights);
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    rights: newValue.rights
+                })
+            })
+        });
+
         /*it('', () => {
             supervisor.setValue({...invalidValue, id: 2}, {emitEvent: false});
 

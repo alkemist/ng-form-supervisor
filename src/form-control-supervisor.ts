@@ -47,9 +47,9 @@ export class FormControlSupervisor<DATA_TYPE>
             console.log('[Control] Set value', emitEvent, value)
         }
 
-        if (emitEvent) {
-            this.control.setValue(value);
-        } else {
+        this.form.setValue(value, {emitEvent: emitEvent});
+
+        if (!emitEvent) {
             // Si on ne passe pas par l'évènement de mise à jour
             // on met à jour le moteur de comparaison manuellement
             this.onChange(value);

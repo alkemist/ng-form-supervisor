@@ -91,9 +91,11 @@ export abstract class FormArraySupervisor<
             }
         }
 
-        if (emitEvent && itemsValue) {
-            this._items.setValue(itemsValue);
-        } else {
+        if (itemsValue) {
+            this._items.setValue(itemsValue, {emitEvent: emitEvent});
+        }
+
+        if (!emitEvent) {
             // Si on ne passe pas par l'évènement de mise à jour
             // on met à jour le moteur de comparaison manuellement
             this.onChange(itemsValue);

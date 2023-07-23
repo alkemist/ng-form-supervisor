@@ -113,9 +113,9 @@ export class FormGroupSupervisor<
             (this.get(property) as FormSupervisor).setValue(value[property], {emitEvent: false});
         });
 
-        if (emitEvent) {
-            this.form.setValue(value);
-        } else {
+        this.form.setValue(value, {emitEvent: emitEvent});
+
+        if (!emitEvent) {
             // Si on ne passe pas par l'évènement de mise à jour
             // on met à jour le moteur de comparaison manuellement
             this.onChange(value);
