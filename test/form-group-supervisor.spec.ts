@@ -692,21 +692,53 @@ describe("FormGroupSupervisor", () => {
                 })
             })
         });
+    })
 
-        /*it('', () => {
-            supervisor.setValue({...invalidValue, id: 2}, {emitEvent: false});
+    describe('Archery', () => {
+        interface CoordinateInterface {
+            x: number,
+            y: number
+        }
 
-            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 2});
-            expect(idSetValueSpy).toBeCalledWith(2, {"emitEvent": true, "onlySelf": false});
-            expect(idOnChangeSpy).not.toBeCalled();
+        interface ArrowInterface {
+            x: number,
+            y: number,
+            score?: number,
+            distance?: number,
+            center?: CoordinateInterface
+        }
 
-            supervisor.setValue({...invalidValue, id: 3}, {emitEvent: false, onlySelf: false});
+        interface ShootingFormInterface {
+            date: Date | null,
+            distance: number | null,
+            target: number | null,
+            arrows: ArrowInterface[]
+        }
 
-            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 3});
+        const shootingForm = new FormGroup({
+            date: new FormControl<Date | null>(new Date()),
+            distance: new FormControl<number | null>(null),
+            target: new FormControl<number | null>(null),
+            arrows: new FormArray([
+                new FormControl<ArrowInterface | null>({
+                    x: 0,
+                    y: 0,
+                    value: 0,
+                    distance: 0,
+                    score: 0,
+                    center: {x: 0, y: 0},
+                } as ArrowInterface)
+            ])
+        });
 
-            supervisor.setValue({...invalidValue, id: 4}, {onlySelf: false});
+        const shootingSupervisor = new FormGroupSupervisor(
+            shootingForm,
+            shootingForm.value as ShootingFormInterface
+        );
 
-            expect(onChangeSpy).toBeCalledWith({...invalidValue, id: 4});
-        })*/
+        it('should have correct supervisor instance', () => {
+            console.log(shootingSupervisor.get("arrows").constructor.name)
+            expect(shootingSupervisor.get("arrows")).toBeInstanceOf(FormArrayControlSupervisor);
+        })
     })
 });

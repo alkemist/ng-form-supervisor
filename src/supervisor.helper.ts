@@ -25,30 +25,32 @@ export abstract class SupervisorHelper {
     >(
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
-        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>,
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
 
-        if (control instanceof FormArray) {
-            if (control.at(0) instanceof FormGroup) {
-                supervisor = new FormArrayGroupSupervisor<DATA_TYPE, typeof control>(
-                    control,
-                    control.value,
+        if (control.constructor.name == "FormArray") {
+            const array = control as FormArray;
+            if (array.at(0).constructor.name == "FormGroup") {
+                supervisor = new FormArrayGroupSupervisor<DATA_TYPE, FormArray>(
+                    array,
+                    array.value,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
                 );
             } else {
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
-                    control,
+                    array,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>
                 );
             }
-        } else if (control instanceof FormGroup) {
-            supervisor = new FormGroupSupervisor<DataType, typeof control>(
-                control,
-                control.value,
+        } else if (control.constructor.name == "FormGroup") {
+            const group = control as FormGroup;
+            supervisor = new FormGroupSupervisor<DataType, FormGroup>(
+                group,
+                group.value,
                 determineArrayIndexFn,
                 itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
             );
