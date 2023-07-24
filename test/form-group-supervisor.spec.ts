@@ -7,6 +7,7 @@ import {
 } from "../src";
 import {ComplexeUser, USER_GROUP, UserProfile, UserRights} from "./test-data";
 import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
+import {CompareState} from "@alkemist/compare-engine";
 
 
 describe("FormGroupSupervisor", () => {
@@ -230,6 +231,33 @@ describe("FormGroupSupervisor", () => {
             supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
 
             expect(supervisor.hasChange()).toBe(true);
+            expect(supervisor.getChanges()).toEqual({
+                id: CompareState.EQUAL,
+                name: CompareState.UPDATED,
+                groups: [
+                    CompareState.UPDATED
+                ],
+                profiles: [
+                    {
+                        username: CompareState.UPDATED,
+                        avatar: CompareState.EQUAL,
+                        badges: [
+                            CompareState.UPDATED
+                        ]
+                    },
+                    {
+                        username: CompareState.EQUAL,
+                        avatar: CompareState.EQUAL,
+                        badges: [
+                            CompareState.EQUAL
+                        ]
+                    }
+                ],
+                rights: {
+                    viewProfile: CompareState.EQUAL,
+                    viewUsers: CompareState.UPDATED,
+                }
+            });
             expect(supervisor.get("id").hasChange()).toBe(false);
             expect(supervisor.get("name").hasChange()).toBe(true);
             expect(supervisor.get('groups').hasChange()).toBe(true);

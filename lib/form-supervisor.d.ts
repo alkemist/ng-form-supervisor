@@ -1,8 +1,9 @@
-import { CompareEngine, ValueKey } from "@alkemist/compare-engine";
+import { CompareEngine, GenericValueRecord, ValueKey } from "@alkemist/compare-engine";
 import { Observable, Subscription } from "rxjs";
-import { FormDataType, FormRawDataType } from "./form.type.js";
+import { FormChange, FormDataType, FormRawDataType } from "./form.type.js";
 import { FormOptions } from "./form.interface.js";
 import { AbstractControl } from "@angular/forms";
+import { CompareState } from "@alkemist/compare-engine/lib/compare-state.js";
 export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends AbstractControl = AbstractControl> {
     protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined;
     protected parentSupervisor?: FormSupervisor<any, AbstractControl<any, any>> | undefined;
@@ -24,6 +25,7 @@ export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends 
     enableLog(): void;
     disableLog(): void;
     onChange(value?: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined): void;
+    getChanges(): CompareState | GenericValueRecord<FormChange> | FormChange[];
     patchValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
     checkOptions(options?: FormOptions): void;
 }

@@ -1,12 +1,13 @@
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {Observable} from "rxjs";
-import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
+import {CompareHelper, GenericValueRecord, ValueKey} from "@alkemist/compare-engine";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
 import {
     ArrayType,
     ControlValueType,
     FormArrayItemConfigurationType,
+    FormChange,
     FormGroupInterface,
     GetFormGroupGenericClass,
     GroupRawValueType,
@@ -216,6 +217,16 @@ export class FormGroupSupervisor<
     getFormProperty<K extends keyof DATA_TYPE>(property: K)
         : GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K] {
         return (this.supervisors[property] as FormSupervisor).form as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K];
+    }
+
+    getChanges() {
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        const changes = properties.map((property) =>
+            (this.get(property) as FormSupervisor).getChanges()
+        ) as FormChange[];
+
+        return SupervisorHelper.mergeArraysToMap(properties as string[], changes) as GenericValueRecord<FormChange>;
     }
 
     enableLog() {

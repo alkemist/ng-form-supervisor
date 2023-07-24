@@ -3,7 +3,7 @@ import {Observable} from "rxjs";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormSupervisor} from "./form-supervisor.js";
 import {SupervisorHelper} from "./supervisor.helper.js";
-import {ControlValueType, FormArrayItemConfigurationType, GetFormArrayGenericClass} from "./form.type.js";
+import {ControlValueType, FormArrayItemConfigurationType, FormChange, GetFormArrayGenericClass} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
@@ -253,6 +253,10 @@ export abstract class FormArraySupervisor<
         super.disableLog();
         this.supervisors.forEach((supervisor) =>
             supervisor.disableLog());
+    }
+
+    getChanges(): FormChange[] {
+        return this.supervisors.map(supervisor => supervisor.getChanges()) as FormChange[]
     }
 
     onChange(itemsValue: DATA_TYPE[] | undefined = this.value) {

@@ -1,8 +1,9 @@
-import {ValueKey, ValuePrimitive} from "@alkemist/compare-engine";
+import {GenericValueRecord, ValueKey, ValuePrimitive} from "@alkemist/compare-engine";
 import {AbstractControl, FormArray, FormControl, FormGroup} from "@angular/forms";
 import {FormArrayControlSupervisor, FormArrayGroupSupervisor} from "./form-array-supervisor.js";
 import {FormGroupSupervisor} from "./form-group-supervisor.js";
 import {FormControlSupervisor} from "./form-control-supervisor.js";
+import {CompareState} from "@alkemist/compare-engine/lib/compare-state.js";
 
 export type ValueForm = ValuePrimitive | ValueRecordForm | ValueArrayForm;
 
@@ -127,3 +128,5 @@ export type GetFormArrayGenericClass<FORM_GROUP> =
     FORM_GROUP extends FormArray<infer T extends AbstractControl>
         ? T
         : never;
+
+export type FormChange = CompareState | GenericValueRecord<CompareState> | CompareState[];

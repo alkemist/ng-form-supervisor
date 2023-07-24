@@ -1,8 +1,9 @@
-import { ValueKey, ValuePrimitive } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey, ValuePrimitive } from "@alkemist/compare-engine";
 import { AbstractControl, FormArray, FormControl, FormGroup } from "@angular/forms";
 import { FormArrayControlSupervisor, FormArrayGroupSupervisor } from "./form-array-supervisor.js";
 import { FormGroupSupervisor } from "./form-group-supervisor.js";
 import { FormControlSupervisor } from "./form-control-supervisor.js";
+import { CompareState } from "@alkemist/compare-engine/lib/compare-state.js";
 export type ValueForm = ValuePrimitive | ValueRecordForm | ValueArrayForm;
 export type ValueFormNullable = ValueForm | null;
 export interface ValueRecordForm {
@@ -47,4 +48,5 @@ export type AbstractForm<DATA_TYPE = any> = AbstractArrayItemForm<DATA_TYPE> | F
 export type SupervisorType<DATA_TYPE, FORM_TYPE> = DATA_TYPE extends (infer DATA_TYPE_ITEM)[] ? FORM_TYPE extends FormArray ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup ? FormArrayGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE> : FormArrayControlSupervisor<DATA_TYPE_ITEM> : FORM_TYPE extends FormGroup ? FormGroupSupervisor<DATA_TYPE_ITEM, FORM_TYPE> : FormControlSupervisor<DATA_TYPE_ITEM> : FORM_TYPE extends FormArray ? GetFormArrayGenericClass<FORM_TYPE> extends FormGroup ? FormArrayGroupSupervisor<DATA_TYPE, FORM_TYPE> : FormArrayControlSupervisor<DATA_TYPE> : FORM_TYPE extends FormGroup ? FormGroupSupervisor<DATA_TYPE, FORM_TYPE> : DATA_TYPE extends boolean ? FormControlSupervisor<boolean> : FormControlSupervisor<DATA_TYPE>;
 export type GetFormGroupGenericClass<FORM_GROUP, DATA_TYPE> = DATA_TYPE extends (infer DATA_TYPE_ITEM)[] ? FORM_GROUP extends FormGroup<infer T> ? T : never : FORM_GROUP extends FormGroup<infer T> ? T : never;
 export type GetFormArrayGenericClass<FORM_GROUP> = FORM_GROUP extends FormArray<infer T extends AbstractControl> ? T : never;
+export type FormChange = CompareState | GenericValueRecord<CompareState> | CompareState[];
 //# sourceMappingURL=form.type.d.ts.map

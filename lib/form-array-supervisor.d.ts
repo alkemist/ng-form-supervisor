@@ -2,7 +2,7 @@ import { ValueKey } from "@alkemist/compare-engine";
 import { Observable } from "rxjs";
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
 import { FormSupervisor } from "./form-supervisor.js";
-import { ControlValueType, FormArrayItemConfigurationType, GetFormArrayGenericClass } from "./form.type.js";
+import { ControlValueType, FormArrayItemConfigurationType, FormChange, GetFormArrayGenericClass } from "./form.type.js";
 import { FormOptions } from "./form.interface.js";
 import { FormGroupSupervisor } from "./form-group-supervisor.js";
 import { FormControlSupervisor } from "./form-control-supervisor.js";
@@ -31,6 +31,7 @@ export declare abstract class FormArraySupervisor<DATA_TYPE, FORM_TYPE extends F
     restore(options?: FormOptions): void;
     enableLog(): void;
     disableLog(): void;
+    getChanges(): FormChange[];
     onChange(itemsValue?: DATA_TYPE[] | undefined): void;
 }
 export declare class FormArrayControlSupervisor<DATA_TYPE> extends FormArraySupervisor<DATA_TYPE, FormArray<FormControl<DATA_TYPE | null>>> {

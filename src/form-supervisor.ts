@@ -1,8 +1,9 @@
-import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
+import {CompareEngine, GenericValueRecord, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {FormDataType, FormRawDataType} from "./form.type.js";
+import {FormChange, FormDataType, FormRawDataType} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {AbstractControl} from "@angular/forms";
+import {CompareState} from "@alkemist/compare-engine/lib/compare-state.js";
 
 export abstract class FormSupervisor<
     DATA_TYPE = any,
@@ -75,6 +76,10 @@ export abstract class FormSupervisor<
     ) {
         this.compareEngine.updateRight(value);
         this.compareEngine.updateCompareIndex();
+    }
+
+    getChanges(): CompareState | GenericValueRecord<FormChange> | FormChange[] {
+        return this.compareEngine.getRightState('');
     }
 
     patchValue(

@@ -1,8 +1,8 @@
 import { FormGroup } from "@angular/forms";
 import { Observable } from "rxjs";
-import { ValueKey } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey } from "@alkemist/compare-engine";
 import { FormSupervisor } from "./form-supervisor.js";
-import { FormArrayItemConfigurationType, FormGroupInterface, GetFormGroupGenericClass, GroupRawValueType, GroupValueType, PartialGroupValueType, SupervisorType } from "./form.type.js";
+import { FormArrayItemConfigurationType, FormChange, FormGroupInterface, GetFormGroupGenericClass, GroupRawValueType, GroupValueType, PartialGroupValueType, SupervisorType } from "./form.type.js";
 import { FormOptions } from "./form.interface.js";
 type SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE extends FormGroup<FormGroupInterface<DATA_TYPE>>> = {
     [K in keyof DATA_TYPE]: SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>;
@@ -26,6 +26,7 @@ export declare class FormGroupSupervisor<DATA_TYPE, FORM_GROUP_TYPE extends Form
     restore(options?: FormOptions): void;
     get<K extends keyof DATA_TYPE>(property: K): SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>;
     getFormProperty<K extends keyof DATA_TYPE>(property: K): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K];
+    getChanges(): GenericValueRecord<FormChange>;
     enableLog(): void;
     disableLog(): void;
 }
