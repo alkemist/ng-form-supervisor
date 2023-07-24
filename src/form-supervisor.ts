@@ -44,13 +44,15 @@ export abstract class FormSupervisor<
 
     }
 
-    updateInitialValue(value?: FormRawDataType<DATA_TYPE, FORM_TYPE>) {
-        if (value) {
-            this.compareEngine.updateLeft(value);
-        } else {
-            this.compareEngine.updateLeft(this.value);
-            this.compareEngine.updateRight(this.value);
-        }
+    updateInitialValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE>) {
+        this.compareEngine.updateLeft(value);
+
+        this.compareEngine.updateCompareIndex();
+    }
+
+    resetInitialValue() {
+        this.compareEngine.updateLeft(this.value);
+        this.compareEngine.updateRight(this.value);
 
         this.compareEngine.updateCompareIndex();
     }

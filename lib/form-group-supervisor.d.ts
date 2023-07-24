@@ -22,7 +22,8 @@ export declare class FormGroupSupervisor<DATA_TYPE, FORM_GROUP_TYPE extends Form
     update(): void;
     reset(options?: FormOptions): void;
     clear(options?: FormOptions): void;
-    updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>): void;
+    updateInitialValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>): void;
+    resetInitialValue(): void;
     restore(options?: FormOptions): void;
     get<K extends keyof DATA_TYPE>(property: K): SupervisorType<DATA_TYPE[K], GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K]>;
     getFormProperty<K extends keyof DATA_TYPE>(property: K): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>[K];

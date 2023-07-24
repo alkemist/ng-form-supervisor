@@ -76,7 +76,7 @@ export class FormGroupSupervisor<
                 return supervisors;
             }, {} as SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>);
 
-        this.updateInitialValue();
+        this.resetInitialValue();
 
         this.sub.add(this.valueChanges.subscribe((value) => {
             if (this.showLog) {
@@ -186,16 +186,24 @@ export class FormGroupSupervisor<
         this.checkOptions(options);
     }
 
-    updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
+    updateInitialValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         properties.forEach((property) => {
-            (this.get(property) as FormSupervisor).updateInitialValue(
-                value !== undefined ? value[property] : undefined
-            );
+            (this.get(property) as FormSupervisor).updateInitialValue(value[property]);
         })
 
         super.updateInitialValue(value);
+    }
+
+    resetInitialValue() {
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).resetInitialValue();
+        })
+
+        super.resetInitialValue();
     }
 
     restore(options?: FormOptions) {

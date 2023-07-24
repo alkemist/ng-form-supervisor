@@ -19,7 +19,8 @@ export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends 
     abstract setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
     abstract reset(options: FormOptions | undefined): void;
     update(): void;
-    updateInitialValue(value?: FormRawDataType<DATA_TYPE, FORM_TYPE>): void;
+    updateInitialValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE>): void;
+    resetInitialValue(): void;
     hasChange(): boolean;
     restore(options?: FormOptions): void;
     enableLog(): void;

@@ -253,7 +253,7 @@ function testFormArray<
     });
 
     it('update initial value', () => {
-        supervisor.updateInitialValue();
+        supervisor.resetInitialValue();
 
         expect(supervisor.hasChange()).toBe(false);
         expect(array.length).toBe(2);

@@ -27,7 +27,8 @@ export declare abstract class FormArraySupervisor<DATA_TYPE, FORM_TYPE extends F
     insert(itemValue: DATA_TYPE, index: number, options?: FormOptions): void;
     remove(index: number, options?: FormOptions): void;
     splice(start: number, deleteCount?: number, options?: FormOptions): void;
-    updateInitialValue(value?: DATA_TYPE[] | undefined): void;
+    updateInitialValue(value: DATA_TYPE[]): void;
+    resetInitialValue(): void;
     restore(options?: FormOptions): void;
     enableLog(): void;
     disableLog(): void;

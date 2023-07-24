@@ -18,7 +18,7 @@ export class FormControlSupervisor<DATA_TYPE>
         super(determineArrayIndexFn, parentSupervisor);
         this.showLog = showLog;
 
-        this.updateInitialValue();
+        this.resetInitialValue();
 
         this.sub.add(this.control.valueChanges.subscribe((value) => {
             if (this.showLog) {

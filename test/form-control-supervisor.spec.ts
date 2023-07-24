@@ -77,7 +77,7 @@ function testFormControl<DATA_TYPE>(
     });
 
     it('should update initial value', () => {
-        supervisor.updateInitialValue();
+        supervisor.resetInitialValue();
 
         expect(supervisor.hasChange()).toBe(false);
     });

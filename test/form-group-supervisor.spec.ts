@@ -273,7 +273,7 @@ describe("FormGroupSupervisor", () => {
         });
 
         it('should update initial value', () => {
-            supervisor.updateInitialValue();
+            supervisor.resetInitialValue();
 
             expect(supervisor.hasChange()).toBe(false);
             expect(supervisor.get("id").hasChange()).toBe(false);

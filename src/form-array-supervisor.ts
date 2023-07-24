@@ -33,14 +33,10 @@ export abstract class FormArraySupervisor<
         super(determineArrayIndexFn, parentSupervisor);
         this.showLog = showLog;
 
-        if (this.showLog) {
-            console.log("constructor itemType", itemType);
-        }
-
         this._items = items;
         this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(this._items);
 
-        this.updateInitialValue();
+        this.resetInitialValue();
 
         this.onChange();
 
@@ -226,11 +222,20 @@ export abstract class FormArraySupervisor<
         this.checkOptions(options);
     }
 
-    updateInitialValue(value?: DATA_TYPE[] | undefined) {
+    updateInitialValue(value: DATA_TYPE[]) {
         this.supervisors.forEach((supervisor, index) =>
-            supervisor.updateInitialValue(value ? value[index] : undefined))
+            supervisor.updateInitialValue(value[index])
+        );
 
         super.updateInitialValue(value);
+    }
+
+    resetInitialValue() {
+        this.supervisors.forEach((supervisor) =>
+            supervisor.resetInitialValue()
+        );
+
+        super.resetInitialValue();
     }
 
     restore(options?: FormOptions) {
@@ -286,10 +291,13 @@ export abstract class FormArraySupervisor<
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
                         && CompareHelper.isArray(this.compareEngine.leftValue)) {
-
-                        supervisor.updateInitialValue(
-                            this.compareEngine.leftValue.at(index) as DATA_TYPE
-                        );
+                        if (index >= this.compareEngine.leftValue.length) {
+                            supervisor.resetInitialValue();
+                        } else {
+                            supervisor.updateInitialValue(
+                                this.compareEngine.leftValue.at(index) as DATA_TYPE
+                            );
+                        }
                     }
 
                     this.supervisors.push(supervisor);
