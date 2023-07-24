@@ -11,14 +11,15 @@ export declare class FormGroupSupervisor<DATA_TYPE, FORM_GROUP_TYPE extends Form
     protected group: FORM_GROUP_TYPE;
     protected configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined;
     supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>;
-    constructor(group: FORM_GROUP_TYPE, data?: DATA_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined, showLog?: boolean);
+    constructor(group: FORM_GROUP_TYPE, data?: DATA_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined, parentSupervisor?: FormSupervisor, showLog?: boolean);
     get form(): FORM_GROUP_TYPE;
     get valid(): boolean;
     get value(): GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>;
     get valueChanges(): Observable<GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>>;
     get controls(): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>;
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions): void;
-    patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions): void;
+    patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions, notifyParent?: boolean): void;
+    update(): void;
     reset(options?: FormOptions): void;
     clear(options?: FormOptions): void;
     updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>): void;

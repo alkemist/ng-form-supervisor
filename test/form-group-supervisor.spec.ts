@@ -53,7 +53,7 @@ describe("FormGroupSupervisor", () => {
             {
                 username: "username1-bis",
                 avatar: null,
-                badges: ["first"],
+                badges: ["second"],
             },
             {
                 username: "username2",
@@ -224,6 +224,7 @@ describe("FormGroupSupervisor", () => {
             supervisor.get('groups').push("ADMIN");
             supervisor.get('groups').at(0).setValue(newValue.groups[0]);
             supervisor.get('profiles').at(0).get("username").setValue(newValue.profiles[0].username);
+            supervisor.get('profiles').at(0).get("badges").setValue(newValue.profiles[0].badges);
             supervisor.get("profiles").push(newValue.profiles[1]);
             supervisor.get("profiles").at(1).get("badges").push(newValueBis.profiles[1].badges[0]);
             supervisor.get("rights").get("viewUsers").setValue(newValue.rights.viewUsers);
@@ -495,7 +496,7 @@ describe("FormGroupSupervisor", () => {
             })
 
             it('should fire name changes', () => {
-                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false});
+                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false, "notifyParent": false});
                 expect(nameOnChangeSpy).toBeCalledWith(newValue.name);
                 // First on Supervisors.forEach, second on FormGroup.setValue
                 expect(nameOnChangeSpy).toBeCalledTimes(2);
@@ -503,29 +504,39 @@ describe("FormGroupSupervisor", () => {
             });
 
             it('should fire groups changes', () => {
-                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false});
+                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false, "notifyParent": false});
                 expect(groupsOnChangeSpy).toBeCalledWith(newValue.groups);
                 expect(groupsOnChangeSpy).toBeCalledTimes(2);
                 expect(userGroups).toEqual(newValue.groups);
             });
 
             it('should fire group 0 changes', () => {
-                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {"emitEvent": false});
+                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {
+                    "emitEvent": false,
+                    "notifyParent": false
+                });
                 expect(group0OnChangeSpy).toBeCalledWith(newValue.groups[0]);
                 expect(group0OnChangeSpy).toBeCalledTimes(2);
                 expect(userGroup0).toEqual(newValue.groups[0]);
             });
 
             it('should fire profiles changes', () => {
-                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {"emitEvent": false});
+                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {
+                    "emitEvent": false,
+                    "notifyParent": false
+                });
                 expect(profilesOnChangeSpy).toBeCalledWith(newValue.profiles);
-                expect(profilesOnChangeSpy).toBeCalledTimes(2);
+                expect(profilesOnChangeSpy).toBeCalledTimes(3);
+                expect(profilesOnChangeSpy).toHaveBeenNthCalledWith(1);
+                expect(profilesOnChangeSpy).toHaveBeenNthCalledWith(2);
+                expect(profilesOnChangeSpy).toHaveBeenNthCalledWith(3, newValue.profiles);
                 expect(userProfiles).toEqual(newValue.profiles);
             });
 
             it('should fire profile 0 changes', () => {
                 expect(profile0SetValueSpy).toBeCalledWith(newValue.profiles[0], {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
                 expect(profile0OnChangeSpy).toBeCalledWith(newValue.profiles[0]);
                 expect(profile0OnChangeSpy).toBeCalledTimes(2);
@@ -535,6 +546,7 @@ describe("FormGroupSupervisor", () => {
             it('should fire profile 0 username changes', () => {
                 expect(profile0UsernameSetValueSpy).toBeCalledWith(newValue.profiles[0].username, {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
                 expect(profile0UsernameOnChangeSpy).toBeCalledWith(newValue.profiles[0].username);
                 expect(profile0UsernameOnChangeSpy).toBeCalledTimes(2);
@@ -542,7 +554,7 @@ describe("FormGroupSupervisor", () => {
             });
 
             it('should fire rights changes', () => {
-                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false});
+                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false, "notifyParent": false});
                 expect(rightsOnChangeSpy).toBeCalledWith(newValue.rights);
                 expect(rightsOnChangeSpy).toBeCalledTimes(2);
                 expect(userRights).toEqual(newValue.rights);
@@ -551,6 +563,7 @@ describe("FormGroupSupervisor", () => {
             it('should fire rights view users changes', () => {
                 expect(rightsViewUsersSetValueSpy).toBeCalledWith(newValue.rights.viewUsers, {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
                 expect(rightsViewUsersOnChangeSpy).toBeCalledWith(newValue.rights.viewUsers);
                 expect(rightsViewUsersOnChangeSpy).toBeCalledTimes(2);
@@ -565,128 +578,290 @@ describe("FormGroupSupervisor", () => {
                 supervisor.setValue(newValue, {emitEvent: false});
             })
 
-            it('should fire form changes', () => {
-                expect(onChangeSpy).toBeCalledWith(newValue);
+            it('should not fire form changes', () => {
+                expect(onChangeSpy).toBeCalledWith();
                 expect(onChangeSpy).toBeCalledTimes(1);
                 expect(userValue).toEqual(null)
             })
 
-            it('should fire name changes', () => {
-                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false});
-                expect(nameOnChangeSpy).toBeCalledWith(newValue.name);
-                // First on Supervisors.forEach, second on FormGroup.setValue
+            it('should not fire name changes', () => {
+                expect(nameSetValueSpy).toBeCalledWith(newValue.name, {"emitEvent": false, "notifyParent": false});
+                expect(nameOnChangeSpy).toBeCalledWith();
                 expect(nameOnChangeSpy).toBeCalledTimes(1);
                 expect(userName).toEqual(null)
             });
 
-            it('should fire groups changes', () => {
-                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false});
-                expect(groupsOnChangeSpy).toBeCalledWith(newValue.groups);
+            it('should not fire groups changes', () => {
+                expect(groupsSetValueSpy).toBeCalledWith(newValue.groups, {"emitEvent": false, "notifyParent": false});
+                expect(groupsOnChangeSpy).toBeCalledWith();
                 expect(groupsOnChangeSpy).toBeCalledTimes(1);
                 expect(userGroups).toEqual(null)
             });
 
 
-            it('should fire group 0 changes', () => {
-                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {"emitEvent": false});
-                expect(group0OnChangeSpy).toBeCalledWith(newValue.groups[0]);
+            it('should not fire group 0 changes', () => {
+                expect(group0SetValueSpy).toBeCalledWith(newValue.groups[0], {
+                    "emitEvent": false,
+                    "notifyParent": false
+                });
+                expect(group0OnChangeSpy).toBeCalledWith();
                 expect(group0OnChangeSpy).toBeCalledTimes(1);
                 expect(userGroup0).toEqual(null)
             });
 
-            it('should fire profiles changes', () => {
-                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {"emitEvent": false});
-                expect(profilesOnChangeSpy).toBeCalledWith(newValue.profiles);
-                expect(profilesOnChangeSpy).toBeCalledTimes(1);
+            it('should not fire profiles changes', () => {
+                expect(profilesSetValueSpy).toBeCalledWith(newValue.profiles, {
+                    "emitEvent": false,
+                    "notifyParent": false
+                });
+                expect(profilesOnChangeSpy).toBeCalledWith();
+                expect(profilesOnChangeSpy).toBeCalledTimes(2);
                 expect(userProfiles).toEqual(null)
             });
 
-            it('should fire profile 0 changes', () => {
+            it('should not fire profile 0 changes', () => {
                 expect(profile0SetValueSpy).toBeCalledWith(newValue.profiles[0], {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
-                expect(profile0OnChangeSpy).toBeCalledWith(newValue.profiles[0]);
+                expect(profile0OnChangeSpy).toBeCalledWith();
                 expect(profile0OnChangeSpy).toBeCalledTimes(1);
                 expect(userProfile0).toEqual(null)
             });
 
-            it('should fire profile 0 username changes', () => {
+            it('should not fire profile 0 username changes', () => {
                 expect(profile0UsernameSetValueSpy).toBeCalledWith(newValue.profiles[0].username, {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
-                expect(profile0UsernameOnChangeSpy).toBeCalledWith(newValue.profiles[0].username);
+                expect(profile0UsernameOnChangeSpy).toBeCalledWith();
                 expect(profile0UsernameOnChangeSpy).toBeCalledTimes(1);
                 expect(userProfile0Username).toEqual(null)
             });
 
-            it('should fire rights changes', () => {
-                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false});
-                expect(rightsOnChangeSpy).toBeCalledWith(newValue.rights);
+            it('should not fire rights changes', () => {
+                expect(rightsSetValueSpy).toBeCalledWith(newValue.rights, {"emitEvent": false, "notifyParent": false});
+                expect(rightsOnChangeSpy).toBeCalledWith();
                 expect(rightsOnChangeSpy).toBeCalledTimes(1);
                 expect(userRights).toEqual(null)
             });
 
-            it('should fire rights view users changes', () => {
+            it('should not fire rights view users changes', () => {
                 expect(rightsViewUsersSetValueSpy).toBeCalledWith(newValue.rights.viewUsers, {
                     "emitEvent": false,
+                    "notifyParent": false
                 });
-                expect(rightsViewUsersOnChangeSpy).toBeCalledWith(newValue.rights.viewUsers);
+                expect(rightsViewUsersOnChangeSpy).toBeCalledWith();
                 expect(rightsViewUsersOnChangeSpy).toBeCalledTimes(1);
                 expect(userRightsViewUsers).toEqual(null)
             });
         });
 
+        describe('should not fire on child change', () => {
+            beforeEach(reset);
 
-        describe('should fire on child change', () => {
-            beforeAll(reset);
-
-            it('should fire form changes', () => {
+            it('should not fire on name change', () => {
                 expect(supervisor.value).toEqual(initialValue)
 
-                supervisor.get('groups').setValue(newValue.groups);
+                supervisor.get('name').setValue(newValue.name, {emitEvent: false});
 
-                expect(onChangeSpy).toBeCalledWith({
-                    ...initialValue,
-                    groups: newValue.groups
-                });
                 expect(onChangeSpy).toBeCalledTimes(1);
-                expect(userValue).toEqual({
-                    ...initialValue,
-                    groups: newValue.groups
-                })
-            })
-        });
-
-
-        describe('should not fire on child change 1', () => {
-            beforeAll(reset);
-
-            it('should fire form changes', () => {
-                expect(supervisor.value).toEqual(initialValue)
-
-                supervisor.get('groups').setValue(newValue.groups, {emitEvent: false});
-
-                expect(onChangeSpy).not.toBeCalled();
-                expect(supervisor.get('groups').value).toEqual(newValue.groups);
+                expect(onChangeSpy).toBeCalledWith();
                 expect(supervisor.value).toEqual({
                     ...initialValue,
-                    groups: newValue.groups
+                    name: newValue.name
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    name: newValue.name
                 })
             })
-        });
 
+            it('should not fire on group update', () => {
+                expect(supervisor.value).toEqual(initialValue)
 
-        describe('should not fire on child change 2', () => {
-            beforeAll(reset);
+                supervisor.get('groups').setValue([
+                    newValue.groups[0],
+                ], {emitEvent: false});
 
-            it('should fire form changes', () => {
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    groups: [
+                        newValue.groups[0],
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    groups: [
+                        newValue.groups[0],
+                    ]
+                })
+            })
+
+            it('should not fire on group update direct', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('groups').at(0).setValue(newValue.groups[0], {emitEvent: false});
+
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    groups: [
+                        newValue.groups[0],
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    groups: [
+                        newValue.groups[0],
+                    ]
+                })
+            })
+
+            it('should not fire on group add', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('groups').setValue([
+                    initialValue.groups[0],
+                    newValue.groups[0],
+                ], {emitEvent: false});
+
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    groups: [
+                        initialValue.groups[0],
+                        newValue.groups[0],
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    groups: [
+                        initialValue.groups[0],
+                        newValue.groups[0],
+                    ]
+                })
+            })
+
+            it('should not fire on profile badge update', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('profiles').at(0).get('badges')
+                    .setValue([
+                        newValue.profiles[0].badges[0]
+                    ], {emitEvent: false});
+
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+            })
+
+            it('should not fire on profile badge update direct', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('profiles').at(0).get('badges')
+                    .at(0).setValue(newValue.profiles[0].badges[0], {emitEvent: false});
+
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+            })
+
+            it('should not fire on profile badge add', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('profiles').at(0).get('badges')
+                    .setValue([
+                        initialValue.profiles[0].badges[0],
+                        newValue.profiles[0].badges[0]
+                    ], {emitEvent: false});
+
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
+                expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                initialValue.profiles[0].badges[0],
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
+                    ...initialValue,
+                    profiles: [
+                        {
+                            ...initialValue.profiles[0],
+                            badges: [
+                                initialValue.profiles[0].badges[0],
+                                newValue.profiles[0].badges[0]
+                            ]
+                        }
+                    ]
+                })
+            })
+
+            it('should not fire on rights change', () => {
                 expect(supervisor.value).toEqual(initialValue)
 
                 supervisor.get('rights').get('viewUsers').setValue(newValue.rights.viewUsers, {emitEvent: false});
 
-                expect(onChangeSpy).not.toBeCalled();
-                expect(supervisor.get('rights').value).toEqual(newValue.rights);
+                expect(onChangeSpy).toBeCalledTimes(1);
+                expect(onChangeSpy).toBeCalledWith();
                 expect(supervisor.value).toEqual({
+                    ...initialValue,
+                    rights: newValue.rights
+                })
+                expect(supervisor['compareEngine'].rightValue).toEqual({
                     ...initialValue,
                     rights: newValue.rights
                 })

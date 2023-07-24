@@ -16,7 +16,8 @@ import {
     ValueFormNullable,
     ValueRecordForm
 } from "./form.type.js";
-import {CompareHelper, ValueKey} from "@alkemist/compare-engine";
+import {CompareHelper, GenericValueRecord, ValueKey} from "@alkemist/compare-engine";
+import {FormSupervisor} from "./form-supervisor.js";
 
 export abstract class SupervisorHelper {
     static factory<
@@ -25,6 +26,7 @@ export abstract class SupervisorHelper {
         SUPERVISOR_TYPE
     >(
         control: FORM_TYPE,
+        parentSupervisor: FormSupervisor,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>,
         showLog = false
@@ -48,6 +50,7 @@ export abstract class SupervisorHelper {
                     array.value,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
+                    parentSupervisor,
                     showLog
                 );
             } else {
@@ -55,6 +58,7 @@ export abstract class SupervisorHelper {
                     array,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>,
+                    parentSupervisor,
                     showLog
                 );
             }
@@ -65,12 +69,15 @@ export abstract class SupervisorHelper {
                 group.value,
                 determineArrayIndexFn,
                 itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
+                parentSupervisor,
                 showLog
             );
         } else {
             supervisor = new FormControlSupervisor<DataType>(
                 control as FormControl<DataType>,
                 determineArrayIndexFn,
+                parentSupervisor,
+                showLog
             );
         }
 
@@ -192,5 +199,18 @@ export abstract class SupervisorHelper {
             }, {} as FormGroupInterface<DATA_TYPE>);
 
         return new FormGroup<FormGroupInterface<DATA_TYPE>>(formInterface, validator);
+    }
+
+    static mergeArraysToMap<VALUE>(keys: string[], values: VALUE[]): GenericValueRecord<VALUE> {
+        if (keys.length !== values.length) {
+            throw new Error("The number of keys and values must be the same.");
+        }
+
+        // Use reduce to create the key/value map
+
+        return keys.reduce((map: GenericValueRecord<VALUE>, key, index) => {
+            map[key] = values[index];
+            return map;
+        }, {});
     }
 }

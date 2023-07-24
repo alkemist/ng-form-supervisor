@@ -1,6 +1,6 @@
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {FormDataType, FormRawDataType, GetFormGroupGenericClass, PartialGroupValueType} from "./form.type.js";
+import {FormDataType, FormRawDataType} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {AbstractControl} from "@angular/forms";
 
@@ -9,12 +9,13 @@ export abstract class FormSupervisor<
     FORM_TYPE extends AbstractControl = AbstractControl
 > {
     protected showLog = false;
-    protected compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>>;
+    protected compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
     protected sub: Subscription = new Subscription();
     private destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
 
     protected constructor(
         protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey),
+        protected parentSupervisor?: FormSupervisor,
     ) {
         this.compareEngine = new CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>(determineArrayIndexFn)
 
@@ -31,9 +32,16 @@ export abstract class FormSupervisor<
 
     abstract get valueChanges(): Observable<FormDataType<DATA_TYPE, FORM_TYPE>>;
 
-    abstract setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined, options?: FormOptions): void;
+    abstract setValue(
+        value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined,
+        options?: FormOptions
+    ): void;
 
-    abstract reset(options?: FormOptions): void;
+    abstract reset(options: FormOptions | undefined): void;
+
+    update() {
+
+    }
 
     updateInitialValue(value?: FormRawDataType<DATA_TYPE, FORM_TYPE>) {
         if (value) {
@@ -62,12 +70,28 @@ export abstract class FormSupervisor<
         this.showLog = false;
     }
 
-    onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined) {
+    onChange(
+        value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined = this.value
+    ) {
         this.compareEngine.updateRight(value);
         this.compareEngine.updateCompareIndex();
     }
 
-    patchValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined, options?: FormOptions) {
+    patchValue(
+        value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions
+    ) {
         this.setValue(value, options);
+    }
+
+    checkOptions(options?: FormOptions) {
+        if (options && !options.emitEvent) {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange();
+
+            if (this.parentSupervisor && (options.notifyParent === true || options.notifyParent === undefined)) {
+                this.parentSupervisor.update();
+            }
+        }
     }
 }

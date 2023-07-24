@@ -1,5 +1,5 @@
 export interface FormOptions {
-    onlySelf?: boolean;
     emitEvent?: boolean;
+    notifyParent?: boolean;
 }
 //# sourceMappingURL=form.interface.d.ts.map

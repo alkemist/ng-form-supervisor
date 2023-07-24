@@ -44,13 +44,13 @@ export type FormDataType<
 > =
     DATA_TYPE | GroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
 
-
 export type FormRawDataType<
     DATA_TYPE,
     FORM_TYPE,
 > =
     DATA_TYPE
-    | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
+    | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>
+    | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
 
 export type ArrayType<T> = T extends (infer U)[] ? U : never;
 export type isValueRecordForm<T> = T extends ValueRecordForm ? T : never;

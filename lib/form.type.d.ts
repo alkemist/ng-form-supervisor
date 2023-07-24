@@ -26,7 +26,7 @@ export type PartialGroupValueType<FORM_GROUP_INTERFACE extends FormGroupInterfac
     [K in keyof FORM_GROUP_INTERFACE]: ControlRawValueType<FORM_GROUP_INTERFACE[K]>;
 }>;
 export type FormDataType<DATA_TYPE, FORM_TYPE extends AbstractControl> = DATA_TYPE | GroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
-export type FormRawDataType<DATA_TYPE, FORM_TYPE> = DATA_TYPE | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
+export type FormRawDataType<DATA_TYPE, FORM_TYPE> = DATA_TYPE | GroupRawValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>;
 export type ArrayType<T> = T extends (infer U)[] ? U : never;
 export type isValueRecordForm<T> = T extends ValueRecordForm ? T : never;
 export type FormArrayItemType<DATA_TYPE> = DATA_TYPE extends ValueRecordForm ? FormControl<DATA_TYPE | null> | FormGroup<FormGroupInterface<DATA_TYPE>> : DATA_TYPE extends boolean ? FormControl<boolean | null> : DATA_TYPE extends string ? FormControl<string | null> : FormControl<DATA_TYPE | null>;

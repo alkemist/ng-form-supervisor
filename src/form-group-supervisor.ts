@@ -43,9 +43,10 @@ export class FormGroupSupervisor<
         data: DATA_TYPE = group.value as DATA_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         protected configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE>,
+        parentSupervisor?: FormSupervisor,
         showLog = false
     ) {
-        super(determineArrayIndexFn);
+        super(determineArrayIndexFn, parentSupervisor);
         this.showLog = showLog;
 
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
@@ -65,9 +66,10 @@ export class FormGroupSupervisor<
                     >
                 >(
                     control,
+                    this,
                     determineArrayIndexFn,
                     this.configuration?.interface[property],
-                    this.showLog
+                    this.showLog,
                 );
 
                 return supervisors;
@@ -107,50 +109,64 @@ export class FormGroupSupervisor<
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
         const emitEvent = options?.emitEvent ?? true;
         if (this.showLog) {
-            console.log('[Group] Set value', emitEvent, value)
+            console.log('[Group] Set value', value)
         }
 
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         properties.forEach((property) => {
-            (this.get(property) as FormSupervisor).setValue(value[property], {emitEvent: false});
+            (this.get(property) as FormSupervisor).setValue(value[property], {emitEvent: false, notifyParent: false});
         });
 
-        this.form.setValue(value, {emitEvent: emitEvent});
+        this.form.setValue(value, {emitEvent});
 
-        if (!emitEvent) {
-            // Si on ne passe pas par l'évènement de mise à jour
-            // on met à jour le moteur de comparaison manuellement
-            this.onChange(value);
-        }
+        this.checkOptions(options);
     }
 
-    patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
+    patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions, notifyParent = true) {
         const emitEvent = options?.emitEvent ?? true;
         if (this.showLog) {
-            console.log('[Group] Patch value', emitEvent, value)
+            console.log('[Group] Patch value', value)
         }
 
         const properties = CompareHelper.keys(value) as (keyof DATA_TYPE)[];
 
         properties.forEach((property) => {
-            (this.get(property) as FormSupervisor).patchValue(value[property], {emitEvent: false});
+            (this.get(property) as FormSupervisor).patchValue(value[property], {emitEvent: false, notifyParent: false});
         });
 
         this.form.patchValue(
             value as GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>,
-            {emitEvent: emitEvent}
+            {emitEvent}
         );
 
-        if (!emitEvent) {
-            // Si on ne passe pas par l'évènement de mise à jour
-            // on met à jour le moteur de comparaison manuellement
-            this.onChange(value);
+        this.checkOptions(options);
+    }
+
+    update(): void {
+        const options = {emitEvent: false};
+
+        if (this.showLog) {
+            console.log('[Group] Parent notified');
         }
+
+        const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
+
+        const values = properties.map((property) =>
+            (this.get(property) as FormSupervisor).value
+        );
+
+        const value = SupervisorHelper.mergeArraysToMap(properties as string[], values);
+
+        this.form.setValue(value, options);
+
+        this.checkOptions(options);
     }
 
     reset(options?: FormOptions) {
         this.form.reset(undefined, options);
+
+        this.checkOptions(options);
     }
 
     clear(options?: FormOptions) {
@@ -160,11 +176,13 @@ export class FormGroupSupervisor<
             const supervisor = this.get(property);
 
             if (supervisor instanceof FormArraySupervisor || supervisor instanceof FormGroupSupervisor) {
-                supervisor.clear(options)
+                supervisor.clear({emitEvent: false, notifyParent: false})
             } else {
-                (supervisor as FormSupervisor).reset(options);
+                (supervisor as FormSupervisor).reset({emitEvent: false, notifyParent: false});
             }
         })
+
+        this.checkOptions(options);
     }
 
     updateInitialValue(value?: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>) {
@@ -182,10 +200,12 @@ export class FormGroupSupervisor<
     restore(options?: FormOptions) {
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
         properties.forEach((property) => {
-            (this.get(property) as FormSupervisor).restore();
+            (this.get(property) as FormSupervisor).restore({emitEvent: false, notifyParent: false});
         });
 
         super.restore();
+
+        this.checkOptions(options);
     }
 
     get<K extends keyof DATA_TYPE>(property: K)

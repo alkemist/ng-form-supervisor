@@ -27,9 +27,10 @@ export abstract class FormArraySupervisor<
         items: FORM_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        parentSupervisor?: FormSupervisor,
         showLog = false
     ) {
-        super(determineArrayIndexFn);
+        super(determineArrayIndexFn, parentSupervisor);
         this.showLog = showLog;
 
         if (this.showLog) {
@@ -41,7 +42,7 @@ export abstract class FormArraySupervisor<
 
         this.updateInitialValue();
 
-        this.onChange(this.value);
+        this.onChange();
 
         this.sub.add(this.valueChanges.subscribe((itemsValue) => {
             if (this.showLog) {
@@ -82,9 +83,9 @@ export abstract class FormArraySupervisor<
             itemsValue.forEach(
                 (itemValue, index) => {
                     if (index < this._items.length) {
-                        this.at(index).setValue(itemValue, {emitEvent: false});
+                        this.at(index).setValue(itemValue, {emitEvent: false, notifyParent: false});
                     } else {
-                        this.push(itemValue, {emitEvent: false});
+                        this.push(itemValue, {emitEvent: false, notifyParent: false});
                     }
                 });
         }
@@ -93,7 +94,7 @@ export abstract class FormArraySupervisor<
             const firstIndex = itemsValue ? itemsValue.length : 0;
             const itemLength = this._items.length;
             for (let i = firstIndex; i < itemLength; i++) {
-                this.remove(firstIndex, {emitEvent: false});
+                this.remove(firstIndex, {emitEvent: false, notifyParent: false});
             }
         }
 
@@ -101,11 +102,22 @@ export abstract class FormArraySupervisor<
             this._items.setValue(itemsValue, {emitEvent: emitEvent});
         }
 
-        if (!emitEvent) {
-            // Si on ne passe pas par l'évènement de mise à jour
-            // on met à jour le moteur de comparaison manuellement
-            this.onChange(itemsValue);
+        this.checkOptions(options);
+    }
+
+    update(): void {
+        const options = {emitEvent: false};
+
+        if (this.showLog) {
+            console.log('[Group] Parent notified');
         }
+
+        const itemsValue =
+            this.supervisors.map((supervisor) => supervisor.value);
+
+        this._items.setValue(itemsValue, options);
+
+        this.checkOptions(options);
     }
 
     move(oldIndex: number, newIndex: number) {
@@ -114,38 +126,43 @@ export abstract class FormArraySupervisor<
 
     patchValue(itemsValue: DATA_TYPE[], options?: FormOptions) {
         const emitEvent = options?.emitEvent ?? true;
+
         if (this.showLog) {
-            console.log('[Array] Patch value', emitEvent, itemsValue)
+            console.log('[Array] Patch value', itemsValue)
         }
 
         if (itemsValue) {
             itemsValue.forEach(
                 (itemValue, index) => {
                     if (index < this._items.length) {
-                        this.at(index).patchValue(itemValue, {emitEvent: false});
+                        this.at(index).patchValue(itemValue, {emitEvent: false, notifyParent: false});
                     } else {
-                        this.push(itemValue, {emitEvent: false});
+                        this.push(itemValue, {emitEvent: false, notifyParent: false});
                     }
                 });
         }
 
         if (itemsValue) {
-            this._items.patchValue(itemsValue, {emitEvent: emitEvent});
+            this._items.patchValue(itemsValue, {emitEvent});
         }
 
-        if (!emitEvent) {
-            // Si on ne passe pas par l'évènement de mise à jour
-            // on met à jour le moteur de comparaison manuellement
-            this.onChange(itemsValue);
-        }
+        this.checkOptions(options);
     }
 
     reset(options?: FormOptions) {
-        this._items.reset(options);
+        const emitEvent = options?.emitEvent ?? true;
+
+        this._items.reset({emitEvent});
+
+        this.checkOptions(options);
     }
 
     clear(options?: FormOptions) {
-        this._items.clear(options);
+        const emitEvent = options?.emitEvent ?? true;
+
+        this._items.clear({emitEvent});
+
+        this.checkOptions(options);
     }
 
     at(index: number): SUPERVISOR_TYPE {
@@ -159,6 +176,8 @@ export abstract class FormArraySupervisor<
     }
 
     push(itemValue: DATA_TYPE, options?: FormOptions) {
+        const emitEvent = options?.emitEvent ?? true;
+
         const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
             this.itemType,
             itemValue
@@ -168,29 +187,43 @@ export abstract class FormArraySupervisor<
             console.log('[Array] Add item', item, item.value)
         }
 
-        this._items.push(item, options);
+        this._items.push(item, {emitEvent});
+
+        this.checkOptions(options);
     }
 
     insert(itemValue: DATA_TYPE, index: number, options?: FormOptions) {
+        const emitEvent = options?.emitEvent ?? true;
+
         const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
             this.itemType,
             itemValue
         );
 
-        this._items.insert(item, index, options);
+        this._items.insert(item, index, {emitEvent});
+
+        this.checkOptions(options);
     }
 
     remove(index: number, options?: FormOptions) {
-        this._items.removeAt(index, options);
+        const emitEvent = options?.emitEvent ?? true;
+
+        this._items.removeAt(index, {emitEvent});
+
+        this.checkOptions(options);
     }
 
-    splice(start: number, deleteCount?: number) {
+    splice(start: number, deleteCount?: number, options?: FormOptions) {
+        const emitEvent = options?.emitEvent ?? true;
+
         Array.from({
                 length: deleteCount ?? this._items.length - start
             },
             (_, i) =>
-                this._items.removeAt(start + i)
+                this._items.removeAt(start + i, {emitEvent: emitEvent})
         );
+
+        this.checkOptions(options);
     }
 
     updateInitialValue(value?: DATA_TYPE[] | undefined) {
@@ -202,10 +235,12 @@ export abstract class FormArraySupervisor<
 
     restore(options?: FormOptions) {
         this.supervisors.forEach((supervisor) =>
-            supervisor.restore(options)
+            supervisor.restore({emitEvent: false, notifyParent: false})
         );
 
         super.restore(options);
+
+        this.checkOptions(options);
     }
 
     enableLog() {
@@ -220,7 +255,7 @@ export abstract class FormArraySupervisor<
             supervisor.disableLog());
     }
 
-    onChange(itemsValue: DATA_TYPE[] | undefined) {
+    onChange(itemsValue: DATA_TYPE[] | undefined = this.value) {
         super.onChange(itemsValue);
         this.supervisors = [];
 
@@ -239,6 +274,7 @@ export abstract class FormArraySupervisor<
                     const supervisor =
                         SupervisorHelper.factory<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
                             control,
+                            this,
                             this.determineArrayIndexFn,
                             this.itemType,
                             this.showLog
@@ -269,9 +305,10 @@ export class FormArrayControlSupervisor<
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
+        parentSupervisor?: FormSupervisor,
         showLog = false
     ) {
-        super(items, determineArrayIndexFn, itemType, showLog);
+        super(items, determineArrayIndexFn, itemType, parentSupervisor, showLog);
     }
 }
 
@@ -287,8 +324,9 @@ export class FormArrayGroupSupervisor<
         values: DATA_TYPE[],
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        parentSupervisor?: FormSupervisor,
         showLog = false
     ) {
-        super(items, determineArrayIndexFn, itemType, showLog);
+        super(items, determineArrayIndexFn, itemType, parentSupervisor, showLog);
     }
 }
