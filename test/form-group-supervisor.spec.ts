@@ -234,29 +234,9 @@ describe("FormGroupSupervisor", () => {
             expect(supervisor.getChanges()).toEqual({
                 id: CompareState.EQUAL,
                 name: CompareState.UPDATED,
-                groups: [
-                    CompareState.UPDATED
-                ],
-                profiles: [
-                    {
-                        username: CompareState.UPDATED,
-                        avatar: CompareState.EQUAL,
-                        badges: [
-                            CompareState.UPDATED
-                        ]
-                    },
-                    {
-                        username: CompareState.EQUAL,
-                        avatar: CompareState.EQUAL,
-                        badges: [
-                            CompareState.EQUAL
-                        ]
-                    }
-                ],
-                rights: {
-                    viewProfile: CompareState.EQUAL,
-                    viewUsers: CompareState.UPDATED,
-                }
+                groups: CompareState.UPDATED,
+                profiles: CompareState.UPDATED,
+                rights: CompareState.UPDATED,
             });
             expect(supervisor.get("id").hasChange()).toBe(false);
             expect(supervisor.get("name").hasChange()).toBe(true);

@@ -261,7 +261,7 @@ export abstract class FormArraySupervisor<
     }
 
     getChanges(): FormChange[] {
-        return this.supervisors.map(supervisor => supervisor.getChanges()) as FormChange[]
+        return this.supervisors.map((_, index) => this.compareEngine.getRightState(index)) as FormChange[]
     }
 
     onChange(itemsValue: DATA_TYPE[] | undefined = this.value) {

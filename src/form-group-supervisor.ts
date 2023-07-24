@@ -231,7 +231,7 @@ export class FormGroupSupervisor<
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
         const changes = properties.map((property) =>
-            (this.get(property) as FormSupervisor).getChanges()
+            this.compareEngine.getRightState(property.toString())
         ) as FormChange[];
 
         return SupervisorHelper.mergeArraysToMap(properties as string[], changes) as GenericValueRecord<FormChange>;
