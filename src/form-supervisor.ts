@@ -1,6 +1,6 @@
 import {CompareEngine, ValueKey} from "@alkemist/compare-engine";
 import {Observable, Subscription} from "rxjs";
-import {FormDataType, FormRawDataType} from "./form.type.js";
+import {FormDataType, FormRawDataType, GetFormGroupGenericClass, PartialGroupValueType} from "./form.type.js";
 import {FormOptions} from "./form.interface.js";
 import {AbstractControl} from "@angular/forms";
 
@@ -9,7 +9,7 @@ export abstract class FormSupervisor<
     FORM_TYPE extends AbstractControl = AbstractControl
 > {
     protected showLog = false;
-    protected compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE>>;
+    protected compareEngine: CompareEngine<FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE>>;
     protected sub: Subscription = new Subscription();
     private destructor: FinalizationRegistry<FormSupervisor<DATA_TYPE, FORM_TYPE>>;
 
@@ -31,7 +31,7 @@ export abstract class FormSupervisor<
 
     abstract get valueChanges(): Observable<FormDataType<DATA_TYPE, FORM_TYPE>>;
 
-    abstract setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
+    abstract setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined, options?: FormOptions): void;
 
     abstract reset(options?: FormOptions): void;
 
@@ -62,8 +62,12 @@ export abstract class FormSupervisor<
         this.showLog = false;
     }
 
-    onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined) {
+    onChange(value: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined) {
         this.compareEngine.updateRight(value);
         this.compareEngine.updateCompareIndex();
+    }
+
+    patchValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | PartialGroupValueType<GetFormGroupGenericClass<FORM_TYPE, DATA_TYPE>, DATA_TYPE> | undefined, options?: FormOptions) {
+        this.setValue(value, options);
     }
 }

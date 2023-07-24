@@ -43,8 +43,10 @@ export class FormGroupSupervisor<
         data: DATA_TYPE = group.value as DATA_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         protected configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE>,
+        showLog = false
     ) {
         super(determineArrayIndexFn);
+        this.showLog = showLog;
 
         const properties = CompareHelper.keys(this.controls) as (keyof DATA_TYPE)[];
 
@@ -64,7 +66,8 @@ export class FormGroupSupervisor<
                 >(
                     control,
                     determineArrayIndexFn,
-                    this.configuration?.interface[property]
+                    this.configuration?.interface[property],
+                    this.showLog
                 );
 
                 return supervisors;
@@ -86,19 +89,19 @@ export class FormGroupSupervisor<
     }
 
     get valid(): boolean {
-        return this.group.valid;
+        return this.form.valid;
     }
 
     get value(): GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE> {
-        return this.group.value as GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>;
+        return this.form.value as GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>;
     }
 
     get valueChanges(): Observable<GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>> {
-        return this.group.valueChanges as Observable<GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>>;
+        return this.form.valueChanges as Observable<GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>>;
     }
 
     get controls() {
-        return this.group.controls as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>;
+        return this.form.controls as GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>;
     }
 
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
@@ -123,14 +126,31 @@ export class FormGroupSupervisor<
     }
 
     patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions) {
-        this.group.patchValue(
+        const emitEvent = options?.emitEvent ?? true;
+        if (this.showLog) {
+            console.log('[Group] Patch value', emitEvent, value)
+        }
+
+        const properties = CompareHelper.keys(value) as (keyof DATA_TYPE)[];
+
+        properties.forEach((property) => {
+            (this.get(property) as FormSupervisor).patchValue(value[property], {emitEvent: false});
+        });
+
+        this.form.patchValue(
             value as GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>,
-            options
+            {emitEvent: emitEvent}
         );
+
+        if (!emitEvent) {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange(value);
+        }
     }
 
     reset(options?: FormOptions) {
-        this.group.reset(undefined, options);
+        this.form.reset(undefined, options);
     }
 
     clear(options?: FormOptions) {

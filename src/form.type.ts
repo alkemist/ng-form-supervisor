@@ -70,18 +70,19 @@ export type FormGroupInterface<DATA_TYPE> = {
         : FormArrayItemType<DATA_TYPE[K]> | FormArray<FormControl<ArrayType<DATA_TYPE[K]> | null>>
 };
 
-export type FormArrayControlItemInterfaceType = 'control';
-
 export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
     [K in keyof DATA_TYPE]: FormArrayItemConfigurationType<DATA_TYPE[K], FORM_ARRAY_ITEM_TYPE>
 };
 
+export type INTERFACE_TYPE = 'control' | 'group' | 'array';
+
 export type FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
+    type: INTERFACE_TYPE,
     interface: FORM_ARRAY_ITEM_TYPE extends FormGroup
         ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
         : FORM_ARRAY_ITEM_TYPE extends FormArray
             ? FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE>
-            : FormArrayControlItemInterfaceType,
+            : null,
     validator: () => {}
 };
 

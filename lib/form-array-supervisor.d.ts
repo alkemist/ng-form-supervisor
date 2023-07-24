@@ -10,7 +10,7 @@ export declare abstract class FormArraySupervisor<DATA_TYPE, FORM_TYPE extends F
     protected itemType: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>;
     protected supervisors: SUPERVISOR_TYPE[];
     protected _items: FORM_TYPE;
-    protected constructor(items: FORM_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>);
+    protected constructor(items: FORM_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>, showLog?: boolean);
     get form(): FORM_TYPE;
     get valid(): boolean;
     get length(): number;
@@ -18,7 +18,7 @@ export declare abstract class FormArraySupervisor<DATA_TYPE, FORM_TYPE extends F
     get valueChanges(): Observable<ControlValueType<FormArray<GetFormArrayGenericClass<FORM_TYPE>>>>;
     setValue(itemsValue: DATA_TYPE[] | undefined, options?: FormOptions): void;
     move(oldIndex: number, newIndex: number): void;
-    patchValue(value: DATA_TYPE[], options?: FormOptions): void;
+    patchValue(itemsValue: DATA_TYPE[], options?: FormOptions): void;
     reset(options?: FormOptions): void;
     clear(options?: FormOptions): void;
     at(index: number): SUPERVISOR_TYPE;
@@ -33,9 +33,9 @@ export declare abstract class FormArraySupervisor<DATA_TYPE, FORM_TYPE extends F
     onChange(itemsValue: DATA_TYPE[] | undefined): void;
 }
 export declare class FormArrayControlSupervisor<DATA_TYPE> extends FormArraySupervisor<DATA_TYPE, FormArray<FormControl<DATA_TYPE | null>>> {
-    constructor(items: FormArray<FormControl<DATA_TYPE | null>>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, FormControl<DATA_TYPE | null>>);
+    constructor(items: FormArray<FormControl<DATA_TYPE | null>>, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, FormControl<DATA_TYPE | null>>, showLog?: boolean);
 }
 export declare class FormArrayGroupSupervisor<DATA_TYPE, FORM_TYPE extends FormArray> extends FormArraySupervisor<DATA_TYPE, FORM_TYPE> {
-    constructor(items: FORM_TYPE, values: DATA_TYPE[], determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>);
+    constructor(items: FORM_TYPE, values: DATA_TYPE[], determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>, showLog?: boolean);
 }
 //# sourceMappingURL=form-array-supervisor.d.ts.map

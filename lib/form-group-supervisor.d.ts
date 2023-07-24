@@ -11,7 +11,7 @@ export declare class FormGroupSupervisor<DATA_TYPE, FORM_GROUP_TYPE extends Form
     protected group: FORM_GROUP_TYPE;
     protected configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined;
     supervisors: SupervisorRecord<DATA_TYPE, FORM_GROUP_TYPE>;
-    constructor(group: FORM_GROUP_TYPE, data?: DATA_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined);
+    constructor(group: FORM_GROUP_TYPE, data?: DATA_TYPE, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, configuration?: FormArrayItemConfigurationType<DATA_TYPE, FORM_GROUP_TYPE> | undefined, showLog?: boolean);
     get form(): FORM_GROUP_TYPE;
     get valid(): boolean;
     get value(): GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>;

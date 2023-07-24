@@ -27,8 +27,14 @@ export abstract class FormArraySupervisor<
         items: FORM_TYPE,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        showLog = false
     ) {
         super(determineArrayIndexFn);
+        this.showLog = showLog;
+
+        if (this.showLog) {
+            console.log("constructor itemType", itemType);
+        }
 
         this._items = items;
         this.itemType = itemType ?? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(this._items);
@@ -106,8 +112,32 @@ export abstract class FormArraySupervisor<
         console.log('@TODO', oldIndex, '=>', newIndex);
     }
 
-    patchValue(value: DATA_TYPE[], options?: FormOptions) {
-        this._items.patchValue(value, options);
+    patchValue(itemsValue: DATA_TYPE[], options?: FormOptions) {
+        const emitEvent = options?.emitEvent ?? true;
+        if (this.showLog) {
+            console.log('[Array] Patch value', emitEvent, itemsValue)
+        }
+
+        if (itemsValue) {
+            itemsValue.forEach(
+                (itemValue, index) => {
+                    if (index < this._items.length) {
+                        this.at(index).patchValue(itemValue, {emitEvent: false});
+                    } else {
+                        this.push(itemValue, {emitEvent: false});
+                    }
+                });
+        }
+
+        if (itemsValue) {
+            this._items.patchValue(itemsValue, {emitEvent: emitEvent});
+        }
+
+        if (!emitEvent) {
+            // Si on ne passe pas par l'évènement de mise à jour
+            // on met à jour le moteur de comparaison manuellement
+            this.onChange(itemsValue);
+        }
     }
 
     reset(options?: FormOptions) {
@@ -210,7 +240,8 @@ export abstract class FormArraySupervisor<
                         SupervisorHelper.factory<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>, SUPERVISOR_TYPE>(
                             control,
                             this.determineArrayIndexFn,
-                            this.itemType
+                            this.itemType,
+                            this.showLog
                         )
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
@@ -238,8 +269,9 @@ export class FormArrayControlSupervisor<
         items: FormArray<FormControl<DATA_TYPE | null>>,
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, FormControl<DATA_TYPE | null>>,
+        showLog = false
     ) {
-        super(items, determineArrayIndexFn, itemType);
+        super(items, determineArrayIndexFn, itemType, showLog);
     }
 }
 
@@ -255,7 +287,8 @@ export class FormArrayGroupSupervisor<
         values: DATA_TYPE[],
         determineArrayIndexFn: ((paths: ValueKey[]) => ValueKey) | undefined = undefined,
         itemType?: FormArrayItemConfigurationType<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>,
+        showLog = false
     ) {
-        super(items, determineArrayIndexFn, itemType);
+        super(items, determineArrayIndexFn, itemType, showLog);
     }
 }

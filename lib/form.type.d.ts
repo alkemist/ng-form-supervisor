@@ -33,12 +33,13 @@ export type FormArrayItemType<DATA_TYPE> = DATA_TYPE extends ValueRecordForm ? F
 export type FormGroupInterface<DATA_TYPE> = {
     [K in keyof DATA_TYPE]: ArrayType<DATA_TYPE[K]> extends ValueRecordForm ? FormArrayItemType<DATA_TYPE[K]> | FormArray<FormControl<ArrayType<DATA_TYPE[K]> | null>> | FormArray<FormGroup<FormGroupInterface<ArrayType<DATA_TYPE[K]>>>> : FormArrayItemType<DATA_TYPE[K]> | FormArray<FormControl<ArrayType<DATA_TYPE[K]> | null>>;
 };
-export type FormArrayControlItemInterfaceType = 'control';
 export type FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
     [K in keyof DATA_TYPE]: FormArrayItemConfigurationType<DATA_TYPE[K], FORM_ARRAY_ITEM_TYPE>;
 };
+export type INTERFACE_TYPE = 'control' | 'group' | 'array';
 export type FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> = {
-    interface: FORM_ARRAY_ITEM_TYPE extends FormGroup ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> : FORM_ARRAY_ITEM_TYPE extends FormArray ? FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> : FormArrayControlItemInterfaceType;
+    type: INTERFACE_TYPE;
+    interface: FORM_ARRAY_ITEM_TYPE extends FormGroup ? FormArrayGroupInterfaceType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> : FORM_ARRAY_ITEM_TYPE extends FormArray ? FormArrayItemConfigurationType<DATA_TYPE, FORM_ARRAY_ITEM_TYPE> : null;
     validator: () => {};
 };
 export type AbstractArrayItemForm<DATA_TYPE = any> = FormControl<DATA_TYPE> | FormGroup<FormGroupInterface<DATA_TYPE>>;

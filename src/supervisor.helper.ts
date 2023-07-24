@@ -11,6 +11,7 @@ import {
     FormArrayItemType,
     FormGroupInterface,
     GetFormArrayGenericClass,
+    INTERFACE_TYPE,
     isValueRecordForm,
     ValueFormNullable,
     ValueRecordForm
@@ -25,25 +26,36 @@ export abstract class SupervisorHelper {
     >(
         control: FORM_TYPE,
         determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined,
-        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>
+        itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>,
+        showLog = false
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
 
         if (control.constructor.name == "FormArray") {
             const array = control as FormArray;
-            if (array.at(0).constructor.name == "FormGroup") {
+
+            if (!itemType && array.length === 0) {
+                console.error("Impossible to determine children type");
+                throw new Error("Impossible to determine children type")
+            }
+
+            if (itemType && itemType.type === 'group'
+                || array.length > 0 && array.at(0).constructor.name == "FormGroup"
+            ) {
                 supervisor = new FormArrayGroupSupervisor<DATA_TYPE, FormArray>(
                     array,
                     array.value,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
+                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
+                    showLog
                 );
             } else {
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
                     array,
                     determineArrayIndexFn,
-                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>
+                    itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>,
+                    showLog
                 );
             }
         } else if (control.constructor.name == "FormGroup") {
@@ -52,7 +64,8 @@ export abstract class SupervisorHelper {
                 group,
                 group.value,
                 determineArrayIndexFn,
-                itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>
+                itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
+                showLog
             );
         } else {
             supervisor = new FormControlSupervisor<DataType>(
@@ -98,12 +111,20 @@ export abstract class SupervisorHelper {
         FORM_TYPE extends AbstractControl
     >(control: FORM_TYPE): FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE> {
         type DataType = ControlValueType<typeof control>;
+        const interfaceType: INTERFACE_TYPE = control instanceof FormGroup
+            ? 'group'
+            : control instanceof FormArray
+                ? 'array'
+                : 'control'
+
         const itemInterface = control instanceof FormGroup
             ? SupervisorHelper.extractFormGroupItemsInterface<DataType>(control as FormGroup)
             : control instanceof FormArray
                 ? SupervisorHelper.extractFormGroupInterface<DATA_TYPE, GetFormArrayGenericClass<typeof control>>(control)
-                : 'control'
+                : null;
+
         return {
+            type: interfaceType,
             interface: itemInterface,
             validator: control.validator
         } as FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>
@@ -127,7 +148,7 @@ export abstract class SupervisorHelper {
             ) as FORM_ARRAY_ITEM_TYPE;
         } else if (
             CompareHelper.isArray<ValueFormNullable>(itemValue)
-            && itemInterface.interface !== 'control'
+            && itemInterface.type !== 'control'
         ) {
             type dataSubItemType = ArrayType<DATA_TYPE>;
             type controlSubItemType = FormArrayItemType<DATA_TYPE>;

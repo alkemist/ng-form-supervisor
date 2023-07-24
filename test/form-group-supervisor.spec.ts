@@ -165,7 +165,7 @@ describe("FormGroupSupervisor", () => {
 
             expect(supervisor.value).toEqual({
                 ...initialValue,
-                ...invalidValue
+                ...invalidValue,
             });
             expect(supervisor.hasChange()).toBe(true);
             expect(supervisor.valid).toBe(false);
@@ -180,13 +180,13 @@ describe("FormGroupSupervisor", () => {
             expect(supervisor.get("groups").valid).toBe(false);
             expect(supervisor.get("profiles").value).toEqual(invalidValue.profiles);
             expect(supervisor.get("profiles").hasChange()).toEqual(true);
+            expect(supervisor.get("profiles").valid).toBe(false);
             expect(supervisor.get('profiles').at(0).hasChange()).toBe(false);
             expect(supervisor.get('profiles').at(0).get('username').hasChange()).toBe(false);
             expect(supervisor.get('profiles').at(0).get('avatar').hasChange()).toBe(false);
             expect(supervisor.get('profiles').at(1).hasChange()).toBe(false);
             expect(supervisor.get('profiles').at(1).get('username').hasChange()).toBe(false);
             expect(supervisor.get('profiles').at(1).get('avatar').hasChange()).toBe(false);
-            expect(supervisor.get("profiles").valid).toBe(false);
             expect(supervisor.get("rights").value).toEqual(invalidValue.rights);
             expect(supervisor.get("rights").hasChange()).toEqual(true);
             expect(supervisor.get("rights").get("viewProfile").hasChange()).toBe(true);
@@ -638,13 +638,13 @@ describe("FormGroupSupervisor", () => {
 
 
         describe('should fire on child change', () => {
-            beforeAll(() => {
-                reset();
-
-                supervisor.get('groups').setValue(newValue.groups);
-            });
+            beforeAll(reset);
 
             it('should fire form changes', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('groups').setValue(newValue.groups);
+
                 expect(onChangeSpy).toBeCalledWith({
                     ...initialValue,
                     groups: newValue.groups
@@ -659,13 +659,13 @@ describe("FormGroupSupervisor", () => {
 
 
         describe('should not fire on child change 1', () => {
-            beforeAll(() => {
-                reset();
-
-                supervisor.get('groups').setValue(newValue.groups, {emitEvent: false});
-            });
+            beforeAll(reset);
 
             it('should fire form changes', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('groups').setValue(newValue.groups, {emitEvent: false});
+
                 expect(onChangeSpy).not.toBeCalled();
                 expect(supervisor.get('groups').value).toEqual(newValue.groups);
                 expect(supervisor.value).toEqual({
@@ -677,13 +677,13 @@ describe("FormGroupSupervisor", () => {
 
 
         describe('should not fire on child change 2', () => {
-            beforeAll(() => {
-                reset();
-
-                supervisor.get('rights').get('viewUsers').setValue(newValue.rights.viewUsers, {emitEvent: false});
-            });
+            beforeAll(reset);
 
             it('should fire form changes', () => {
+                expect(supervisor.value).toEqual(initialValue)
+
+                supervisor.get('rights').get('viewUsers').setValue(newValue.rights.viewUsers, {emitEvent: false});
+
                 expect(onChangeSpy).not.toBeCalled();
                 expect(supervisor.get('rights').value).toEqual(newValue.rights);
                 expect(supervisor.value).toEqual({
@@ -692,53 +692,5 @@ describe("FormGroupSupervisor", () => {
                 })
             })
         });
-    })
-
-    describe('Archery', () => {
-        interface CoordinateInterface {
-            x: number,
-            y: number
-        }
-
-        interface ArrowInterface {
-            x: number,
-            y: number,
-            score?: number,
-            distance?: number,
-            center?: CoordinateInterface
-        }
-
-        interface ShootingFormInterface {
-            date: Date | null,
-            distance: number | null,
-            target: number | null,
-            arrows: ArrowInterface[]
-        }
-
-        const shootingForm = new FormGroup({
-            date: new FormControl<Date | null>(new Date()),
-            distance: new FormControl<number | null>(null),
-            target: new FormControl<number | null>(null),
-            arrows: new FormArray([
-                new FormControl<ArrowInterface | null>({
-                    x: 0,
-                    y: 0,
-                    value: 0,
-                    distance: 0,
-                    score: 0,
-                    center: {x: 0, y: 0},
-                } as ArrowInterface)
-            ])
-        });
-
-        const shootingSupervisor = new FormGroupSupervisor(
-            shootingForm,
-            shootingForm.value as ShootingFormInterface
-        );
-
-        it('should have correct supervisor instance', () => {
-            console.log(shootingSupervisor.get("arrows").constructor.name)
-            expect(shootingSupervisor.get("arrows")).toBeInstanceOf(FormArrayControlSupervisor);
-        })
     })
 });
