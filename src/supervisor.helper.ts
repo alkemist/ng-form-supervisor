@@ -34,45 +34,58 @@ export abstract class SupervisorHelper {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
 
-        if (control.constructor.name == "FormArray") {
-            const array = control as FormArray;
-
-            if (!itemType && array.length === 0) {
+        if (SupervisorHelper.isFormArray(control)) {
+            if (!itemType && control.length === 0) {
                 console.error("Impossible to determine children type");
                 throw new Error("Impossible to determine children type")
             }
 
             if (itemType && itemType.type === 'group'
-                || array.length > 0 && array.at(0).constructor.name == "FormGroup"
+                || control.length > 0 && control.at(0).constructor == FormGroup
             ) {
+                if (showLog) {
+                    console.log('[ArrayGroup] Build supervisor for values : ', control.value);
+                }
+
                 supervisor = new FormArrayGroupSupervisor<DATA_TYPE, FormArray>(
-                    array,
-                    array.value,
+                    control,
+                    control.value,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
                     parentSupervisor,
                     showLog
                 );
             } else {
+                if (showLog) {
+                    console.log('[ArrayControl] Build supervisor for values : ', control.value);
+                }
+
                 supervisor = new FormArrayControlSupervisor<DATA_TYPE>(
-                    array,
+                    control,
                     determineArrayIndexFn,
                     itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormControl>,
                     parentSupervisor,
                     showLog
                 );
             }
-        } else if (control.constructor.name == "FormGroup") {
-            const group = control as FormGroup;
+        } else if (SupervisorHelper.isFormGroup(control)) {
+            if (showLog) {
+                console.log('[Group] Build supervisor for values : ', control.value);
+            }
+
             supervisor = new FormGroupSupervisor<DataType, FormGroup>(
-                group,
-                group.value,
+                control,
+                control.value,
                 determineArrayIndexFn,
                 itemType as FormArrayItemConfigurationType<ControlValueType<FORM_TYPE>, FormGroup>,
                 parentSupervisor,
                 showLog
             );
         } else {
+            if (showLog) {
+                console.log('[Control] Build supervisor for values : ', control.value);
+            }
+
             supervisor = new FormControlSupervisor<DataType>(
                 control as FormControl<DataType>,
                 determineArrayIndexFn,
@@ -82,6 +95,20 @@ export abstract class SupervisorHelper {
         }
 
         return supervisor as SUPERVISOR_TYPE;
+    }
+
+    static isFormGroup(control: FormArray | FormGroup | FormControl): control is FormGroup {
+        return control instanceof FormGroup
+            || control.constructor === FormGroup
+            || control.constructor.name === "FormGroup"
+            ;
+    }
+
+    static isFormArray(control: FormArray | FormGroup | FormControl): control is FormArray {
+        return control instanceof FormArray
+            || control.constructor === FormArray
+            || control.constructor.name === "FormArray"
+            ;
     }
 
     static extractFormGroupInterface<

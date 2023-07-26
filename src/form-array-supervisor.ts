@@ -73,6 +73,9 @@ export abstract class FormArraySupervisor<
         const emitEvent = options?.emitEvent ?? true;
         if (this.showLog) {
             console.log('[Array] Set value', emitEvent, itemsValue)
+            if (itemsValue) {
+                console.log('[Array] From ', this._items.length, " => ", itemsValue?.length);
+            }
         }
 
         if (itemsValue) {
@@ -174,10 +177,11 @@ export abstract class FormArraySupervisor<
     push(itemValue: DATA_TYPE, options?: FormOptions) {
         const emitEvent = options?.emitEvent ?? true;
 
-        const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
-            this.itemType,
-            itemValue
-        );
+        const item =
+            SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
+                this.itemType,
+                itemValue
+            );
 
         if (this.showLog) {
             console.log('[Array] Add item', item, item.value)
@@ -191,10 +195,11 @@ export abstract class FormArraySupervisor<
     insert(itemValue: DATA_TYPE, index: number, options?: FormOptions) {
         const emitEvent = options?.emitEvent ?? true;
 
-        const item = SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
-            this.itemType,
-            itemValue
-        );
+        const item =
+            SupervisorHelper.factoryItem<DATA_TYPE, GetFormArrayGenericClass<FORM_TYPE>>(
+                this.itemType,
+                itemValue
+            );
 
         this._items.insert(item, index, {emitEvent});
 
@@ -202,6 +207,10 @@ export abstract class FormArraySupervisor<
     }
 
     remove(index: number, options?: FormOptions) {
+        if (this.showLog) {
+            console.log('[Array] Remove item', index)
+        }
+
         const emitEvent = options?.emitEvent ?? true;
 
         this._items.removeAt(index, {emitEvent});
