@@ -33,7 +33,7 @@ export abstract class SupervisorHelper {
     ): SUPERVISOR_TYPE {
         type DataType = ControlValueType<typeof control>;
         let supervisor;
-
+        
         if (SupervisorHelper.isFormArray(control)) {
             if (!itemType && control.length === 0) {
                 console.error("Impossible to determine children type");
@@ -100,14 +100,20 @@ export abstract class SupervisorHelper {
     static isFormGroup(control: FormArray | FormGroup | FormControl): control is FormGroup {
         return control instanceof FormGroup
             || control.constructor === FormGroup
+            || control.constructor.name === FormGroup.name
             || control.constructor.name === "FormGroup"
+            || Object.getPrototypeOf(control) === FormGroup.prototype
+            || Object.is(Object.getPrototypeOf(control), FormGroup.prototype)
             ;
     }
 
     static isFormArray(control: FormArray | FormGroup | FormControl): control is FormArray {
         return control instanceof FormArray
             || control.constructor === FormArray
+            || control.constructor.name === FormArray.name
             || control.constructor.name === "FormArray"
+            || Object.getPrototypeOf(control) === FormArray.prototype
+            || Object.is(Object.getPrototypeOf(control), FormArray.prototype)
             ;
     }
 
