@@ -26,7 +26,8 @@ export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends 
     enableLog(): void;
     disableLog(): void;
     onChange(value?: FormDataType<DATA_TYPE, FORM_TYPE> | FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined): void;
-    getChanges(): CompareState | GenericValueRecord<FormChange> | FormChange[];
+    getChanges(path?: ValueKey | ValueKey[]): CompareState | GenericValueRecord<FormChange> | FormChange[];
+    getInitialChanges(path?: ValueKey | ValueKey[]): CompareState | GenericValueRecord<FormChange> | FormChange[];
     patchValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void;
     checkOptions(options?: FormOptions): void;
 }

@@ -17,6 +17,7 @@ Adds new functionality to Angular forms (FormGroup, FormArray, FormControl):
 - A modification state between initial value and form value, using comparison
   engine ([@alkemist/compare-engine](https://github.com/alkemist/compare-engine))
 - The ability to restore to original value, but also to modify initial value
+- Even if you decide not to emit an event (emitEvent : false), parents and children are warned of the value change
 - The ability to add an element to a FormArray only with a value, the only constraint being that when the FormArray is
   initialized, it must contain at least one element, to determine its "construction signature" (the type of element it
   contains, see example)  
@@ -75,6 +76,9 @@ Supervisors will recursively build the supervisors of the form's child elements 
     const supervisor =
             new FormGroupSupervisor(group, group.value as ComplexeUser);
 
+    // Each child of the form has its own supervisor
+    // who manages its state of comparison between the initial value and the value of the form.
+
     supervisor.get("name")                                // return a FormControlSupervisor
     supervisor.get("groups")                              // return a FormArrayControlSupervisor
     supervisor.get("groups").at(0)                        // return a FormControlSupervisor
@@ -96,6 +100,38 @@ Supervisors will recursively build the supervisors of the form's child elements 
             badges: new FormArray([]),
         }));
 
+    # State can be recovered in this way:
+    supervisor.hasChange()                                // return true
+    supervisor.get("profiles").hasChange()                // return true
+    supervisor.get("profiles").at(0).hasChange()          // return false
+    supervisor.get("profiles").at(1).hasChange()          // return false
+    supervisor.get("rights").hasChange()                  // return false
+
+    supervisor.getChanges()                               
+    /* return 
+        {
+            id:         CompareState.EQUAL,
+            name:       CompareState.EQUAL,
+            groups:     CompareState.EQUAL,
+            profiles:   CompareState.UPDATED,
+            rights:     CompareState.EQUAL
+        }
+    */
+
+    supervisor.get("profiles").getChanges()                               
+    /* return 
+        [
+          CompareState.EQUAL,
+          CompareState.ADDED,
+        ]
+    */
+
+    supervisor.get("profiles").setValue([])
+    supervisor.get("profiles").getInitialChanges(0)    // return CompareState.REMOVED
+
+    supervisor.resetInitialValue()                                
+    supervisor.hasChange()                             // return false
+
 ## Exposed models, enums and utils
 
     abstract class FormSupervisor<
@@ -111,10 +147,16 @@ Supervisors will recursively build the supervisors of the form's child elements 
         get valueChanges(): Observable<FormDataType<DATA_TYPE, FORM_TYPE>>
     
         setValue(value: FormRawDataType<DATA_TYPE, FORM_TYPE> | undefined, options?: FormOptions): void
-    
+        
+        getChanges(path: ValueKey | ValueKey[] = ''): CompareState | GenericValueRecord<FormChange> | FormChange[]
+
+        getInitialChanges(path: ValueKey | ValueKey[] = ''): CompareState | GenericValueRecord<FormChange> | FormChange[]
+
         reset(options?: FormOptions): void
 
         updateInitialValue(value?: FormRawDataType<DATA_TYPE, FORM_TYPE>)
+
+        resetInitialValue(): void
 
         hasChange(): boolean
 

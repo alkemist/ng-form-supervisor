@@ -80,8 +80,12 @@ export abstract class FormSupervisor<
         this.compareEngine.updateCompareIndex();
     }
 
-    getChanges(): CompareState | GenericValueRecord<FormChange> | FormChange[] {
-        return this.compareEngine.getRightState('');
+    getChanges(path: ValueKey | ValueKey[] = ''): CompareState | GenericValueRecord<FormChange> | FormChange[] {
+        return this.compareEngine.getRightState(path);
+    }
+
+    getInitialChanges(path: ValueKey | ValueKey[] = ''): CompareState | GenericValueRecord<FormChange> | FormChange[] {
+        return this.compareEngine.getLeftState(path);
     }
 
     patchValue(

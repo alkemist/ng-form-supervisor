@@ -270,7 +270,9 @@ export abstract class FormArraySupervisor<
     }
 
     getChanges(): FormChange[] {
-        return this.supervisors.map((_, index) => this.compareEngine.getRightState(index)) as FormChange[]
+        return this.supervisors.map((_, index) =>
+            this.compareEngine.getRightState(index)
+        ) as FormChange[]
     }
 
     onChange(itemsValue: DATA_TYPE[] | undefined = this.value) {
@@ -300,6 +302,7 @@ export abstract class FormArraySupervisor<
 
                     if (CompareHelper.isEvaluable(this.compareEngine.leftValue)
                         && CompareHelper.isArray(this.compareEngine.leftValue)) {
+
                         if (index >= this.compareEngine.leftValue.length) {
                             supervisor.resetInitialValue();
                         } else {
