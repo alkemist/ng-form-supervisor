@@ -1,9 +1,10 @@
-import { CompareEngine, GenericValueRecord, ValueKey } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey } from "@alkemist/smart-tools";
 import { Observable, Subscription } from "rxjs";
 import { FormChange, FormDataType, FormRawDataType } from "./form.type.js";
 import { FormOptions } from "./form.interface.js";
 import { AbstractControl } from "@angular/forms";
 import { CompareState } from "@alkemist/compare-engine/lib/compare-state.js";
+import { CompareEngine } from '@alkemist/compare-engine';
 export declare abstract class FormSupervisor<DATA_TYPE = any, FORM_TYPE extends AbstractControl = AbstractControl> {
     protected determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined;
     protected parentSupervisor?: FormSupervisor<any, AbstractControl<any, any>> | undefined;

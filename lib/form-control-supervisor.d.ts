@@ -1,6 +1,6 @@
 import { FormControl } from "@angular/forms";
 import { Observable } from "rxjs";
-import { ValueKey } from "@alkemist/compare-engine";
+import { ValueKey } from "@alkemist/smart-tools";
 import { FormSupervisor } from "./form-supervisor.js";
 import { FormOptions } from "./form.interface.js";
 export declare class FormControlSupervisor<DATA_TYPE> extends FormSupervisor<DATA_TYPE, FormControl<DATA_TYPE>> {

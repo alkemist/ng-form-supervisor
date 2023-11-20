@@ -1,6 +1,6 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from "@angular/forms";
 import { FormArrayGroupInterfaceType, FormArrayItemConfigurationType, FormGroupInterface, ValueRecordForm } from "./form.type.js";
-import { GenericValueRecord, ValueKey } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey } from "@alkemist/smart-tools";
 import { FormSupervisor } from "./form-supervisor.js";
 export declare abstract class SupervisorHelper {
     static factory<DATA_TYPE, FORM_TYPE extends FormArray | FormGroup | FormControl, SUPERVISOR_TYPE>(control: FORM_TYPE, parentSupervisor: FormSupervisor, determineArrayIndexFn?: ((paths: ValueKey[]) => ValueKey) | undefined, itemType?: FormArrayItemConfigurationType<DATA_TYPE, FORM_TYPE>, showLog?: boolean): SUPERVISOR_TYPE;

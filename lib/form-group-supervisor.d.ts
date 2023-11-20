@@ -1,6 +1,6 @@
 import { FormGroup } from "@angular/forms";
 import { Observable } from "rxjs";
-import { GenericValueRecord, ValueKey } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey } from "@alkemist/smart-tools";
 import { FormSupervisor } from "./form-supervisor.js";
 import { FormArrayItemConfigurationType, FormChange, FormGroupInterface, GetFormGroupGenericClass, GroupRawValueType, GroupValueType, PartialGroupValueType, SupervisorType } from "./form.type.js";
 import { FormOptions } from "./form.interface.js";
@@ -17,6 +17,7 @@ export declare class FormGroupSupervisor<DATA_TYPE, FORM_GROUP_TYPE extends Form
     get value(): GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>;
     get valueChanges(): Observable<GroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>>;
     get controls(): GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>;
+    private get properties();
     setValue(value: GroupRawValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions): void;
     patchValue(value: PartialGroupValueType<GetFormGroupGenericClass<FORM_GROUP_TYPE, DATA_TYPE>, DATA_TYPE>, options?: FormOptions, notifyParent?: boolean): void;
     update(): void;

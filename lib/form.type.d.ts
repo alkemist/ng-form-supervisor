@@ -1,9 +1,9 @@
-import { GenericValueRecord, ValueKey, ValuePrimitive } from "@alkemist/compare-engine";
+import { GenericValueRecord, ValueKey, ValuePrimitive } from "@alkemist/smart-tools";
 import { AbstractControl, FormArray, FormControl, FormGroup } from "@angular/forms";
 import { FormArrayControlSupervisor, FormArrayGroupSupervisor } from "./form-array-supervisor.js";
 import { FormGroupSupervisor } from "./form-group-supervisor.js";
 import { FormControlSupervisor } from "./form-control-supervisor.js";
-import { CompareState } from "@alkemist/compare-engine/lib/compare-state.js";
+import { CompareState } from "@alkemist/compare-engine";
 export type ValueForm = ValuePrimitive | ValueRecordForm | ValueArrayForm;
 export type ValueFormNullable = ValueForm | null;
 export interface ValueRecordForm {
